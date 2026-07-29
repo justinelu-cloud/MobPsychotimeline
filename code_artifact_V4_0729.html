@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026獵人實境解謎_高雄站 專案時程甘特圖</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DayJS for Date Operations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.9/dayjs.min.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .gantt-grid {
+            background-size: 40px 100%;
+            background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .task-row:hover {
+            background-color: #f8fafc;
+        }
+        .task-row.selected {
+            background-color: #eff6ff;
+        }
+        .pane-resizer {
+            width: 5px;
+            cursor: col-resize;
+            background-color: #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        .pane-resizer:hover, .pane-resizer.resizing {
+            background-color: #6366f1;
+        }
+        .critical-bar {
+            box-shadow: 0 0 0 2px #f43f5e;
+        }
+        .toast {
+            animation: fadeInOut 3s forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col font-sans select-none">
+
+    <!-- Header Toolbar -->
+    <header class="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+                <i class="fa-solid fa-chart-gantt text-xl"></i>
+            </div>
+            <div>
+                <h1 id="projectTitle" class="font-bold text-slate-800 text-lg leading-tight flex items-center gap-2">
+                    2026獵人實境解謎_高雄站
+                    <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">官方正式版</span>
+                </h1>
+                <p id="projectSubtext" class="text-xs text-slate-500">自動階層編號 · 獨立群組展開 · 群組樹狀複製 · 刪除負責人選單</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+            <!-- View Mode Selector -->
+            <div class="bg-slate-100 p-1 rounded-lg flex items-center border border-slate-200">
+                <button onclick="setViewMode('day')" id="btnViewDay" class="px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600">日 View</button>
+                <button onclick="setViewMode('week')" id="btnViewWeek" class="px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition">週 View</button>
+                <button onclick="setViewMode('month')" id="btnViewMonth" class="px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition">月 View</button>
+            </div>
+
+            <div class="h-4 w-px bg-slate-300 mx-1"></div>
+
+            <!-- Action Buttons -->
+            <button onclick="toggleCriticalPath()" id="btnCriticalPath" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-route text-rose-500"></i> 關鍵路徑
+            </button>
+
+            <button onclick="scrollToToday()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+                <i class="fa-regular fa-calendar-check text-indigo-500"></i> 定位今天
+            </button>
+
+            <!-- Assignee Filter -->
+            <select id="filterAssignee" onchange="applyFilters()" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">全部負責人 / 單位</option>
+            </select>
+
+            <!-- JSON Data Operations -->
+            <button onclick="exportJSON()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-medium text-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-download text-indigo-500"></i> 匯出 JSON
+            </button>
+
+            <button onclick="openImportModal()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-medium text-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-upload text-indigo-500"></i> 匯入 JSON
+            </button>
+
+            <button onclick="resetData()" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 text-xs font-medium transition flex items-center gap-1">
+                <i class="fa-solid fa-rotate-left"></i> 重置官方範本
+            </button>
+
+            <button onclick="openTaskModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition shadow flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> 新增任務
+            </button>
+        </div>
+    </header>
+
+    <!-- Metrics Dashboard -->
+    <div class="bg-white border-b border-slate-200 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs shrink-0 z-10 shadow-xs">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-500">總任務數:</span>
+                <span id="metricTotalTasks" class="font-bold text-slate-800 text-sm">0</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-500">進行中:</span>
+                <span id="metricInProgress" class="font-bold text-blue-600 text-sm">0</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-500">已完工:</span>
+                <span id="metricCompleted" class="font-bold text-emerald-600 text-sm">0</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-500">專案總進度:</span>
+                <div class="w-32 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="metricProgressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <span id="metricProgressText" class="font-bold text-indigo-600 text-sm">0%</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2 text-slate-400">
+            <span>快捷提示: 按 <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[10px] font-mono text-slate-600">Enter</kbd> 建子任務 | 點擊 <i class="fa-regular fa-copy"></i> 圖示連動複製群組/任務</span>
+        </div>
+    </div>
+
+    <!-- Main Gantt Workspace -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- Left Task Table Pane -->
+        <div id="leftPane" class="w-[450px] min-w-[280px] max-w-[650px] bg-white border-r border-slate-200 flex flex-col shrink-0">
+            <!-- Table Header -->
+            <div class="h-10 bg-slate-100 border-b border-slate-200 flex items-center px-3 text-xs font-semibold text-slate-600 shrink-0">
+                <div class="flex-1 min-w-0 flex items-center gap-1">
+                    <button onclick="toggleExpandAll()" title="全部展開 / 收合" class="p-1 hover:bg-slate-200 rounded transition text-slate-500">
+                        <i class="fa-solid fa-arrows-up-down"></i>
+                    </button>
+                    <span>項次 / 任務名稱</span>
+                </div>
+                <div class="w-24 text-center">負責人/單位</div>
+                <div class="w-12 text-center">工期</div>
+                <div class="w-12 text-right pr-1">進度</div>
+                <div class="w-14 text-center">操作</div>
+            </div>
+            <!-- Task Rows List -->
+            <div id="taskListContainer" class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+                <!-- Dynamically rendered task rows -->
+            </div>
+        </div>
+
+        <!-- Resizer Bar -->
+        <div id="paneResizer" class="pane-resizer shrink-0"></div>
+
+        <!-- Right Timeline Pane -->
+        <div id="rightPane" class="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar bg-slate-50 relative">
+            <div id="timelineContainer" class="min-w-full inline-block relative">
+                <!-- Timeline Headers & Grid Bars rendered via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal (Create & Edit) -->
+    <div id="taskModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 transform transition-all">
+            <div class="bg-slate-800 px-5 py-4 flex justify-between items-center text-white">
+                <h3 id="modalTitle" class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-400"></i> 編輯任務屬性
+                </h3>
+                <button type="button" onclick="closeTaskModal()" class="text-slate-400 hover:text-white transition text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="taskForm" onsubmit="handleTaskFormSubmit(event)" class="p-5 space-y-4 text-xs">
+                <input type="hidden" id="taskId">
+                
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">任務名稱 *</label>
+                    <input type="text" id="taskName" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">任務類型</label>
+                        <select id="taskType" onchange="handleTaskTypeChange()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="TASK">一般任務 (Task)</option>
+                            <option value="GROUP">任務群組 (Group)</option>
+                            <option value="MILESTONE">里程碑 (Milestone - 0天)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">所屬父群組 (支援4層級)</label>
+                        <select id="taskParent" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="">(無 - 最頂層)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Date & Duration Auto Sync Fields -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">開始日期 *</label>
+                        <input type="date" id="taskStartDate" required onchange="onStartDateChange()" class="w-full p-1.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">結束日期 *</label>
+                        <input type="date" id="taskEndDate" required onchange="onEndDateChange()" class="w-full p-1.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-indigo-700 mb-1">工期 (天) *</label>
+                        <input type="number" id="taskDuration" min="0" required oninput="onDurationChange()" class="w-full p-1.5 border border-indigo-300 bg-indigo-50/50 font-bold text-indigo-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">進度百分比 (%)</label>
+                        <input type="number" id="taskProgress" min="0" max="100" value="0" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">執行狀態</label>
+                        <select id="taskStatus" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="NOT_STARTED">未開始</option>
+                            <option value="IN_PROGRESS">進行中</option>
+                            <option value="COMPLETED">已完工</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Multi-select Assignee with Delete capability -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block font-semibold text-slate-700">負責人 / 單位 (點擊選擇，按 ✕ 可刪除選項)</label>
+                    </div>
+                    <div id="assigneeCheckboxes" class="flex flex-wrap gap-1.5 p-2.5 bg-slate-50 border border-slate-200 rounded-lg max-h-32 overflow-y-auto custom-scrollbar">
+                        <!-- Checkbox tags rendered via JS -->
+                    </div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <input type="text" id="newAssigneeInput" placeholder="輸入新負責人/單位名稱..." class="flex-1 p-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" onclick="addNewAssigneeOption()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md text-xs font-medium transition">
+                            + 新增選單項目
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btnDeleteTask" onclick="deleteCurrentTask()" class="px-3 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-medium transition hidden">
+                            <i class="fa-solid fa-trash"></i> 刪除任務
+                        </button>
+                        <button type="button" id="btnDuplicateTask" onclick="duplicateCurrentTaskFromModal()" class="px-3 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-medium transition hidden">
+                            <i class="fa-regular fa-copy"></i> 複製群組/任務
+                        </button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeTaskModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 transition">取消</button>
+                        <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow">儲存變更</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JSON Import Modal -->
+    <div id="importModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 transform transition-all">
+            <div class="bg-slate-800 px-5 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-import text-indigo-400"></i> 匯入甘特圖專案 JSON 資料
+                </h3>
+                <button type="button" onclick="closeImportModal()" class="text-slate-400 hover:text-white transition text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">選擇 JSON 檔案或貼上 JSON 內容：</label>
+                    <input type="file" id="jsonFileInput" accept=".json" onchange="importJSON(event)" class="mb-3 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    <textarea id="jsonTextArea" rows="8" class="w-full p-2.5 border border-slate-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請將 JSON 文字內容貼於此處..."></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                    <button type="button" onclick="closeImportModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 transition">取消</button>
+                    <button type="button" onclick="handleImportJSON()" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition shadow">確認匯入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const DEFAULT_ASSIGNEES = [
+            "Justine", "Paul", "Zora", "Zoya", "Chris", "Jerry",
+            "活動部", "商品部", "管理部", "行銷部", "設計部", "Sales", "Design", "外包廠商"
+        ];
+
+        const OFFICIAL_TASKS = [
+            // 1. 策略與合約
+            { id: "T1", name: "策略與預算審核", type: "GROUP", parent: null, startDate: "2026-04-01", endDate: "2026-07-31", progress: 100, status: "COMPLETED", assignee: "Justine", color: "#4f46e5", collapsed: false },
+            { id: "T1-1", name: "專案內部提案與企劃", type: "TASK", parent: "T1", startDate: "2026-04-01", endDate: "2026-04-30", progress: 100, status: "COMPLETED", assignee: "Justine, Jerry", color: "#6366f1" },
+            { id: "T1-2", name: "專案總預算表與財務評估", type: "TASK", parent: "T1", startDate: "2026-07-01", endDate: "2026-07-21", progress: 100, status: "COMPLETED", assignee: "Justine", color: "#6366f1" },
+
+            // 2. IP授權與合約
+            { id: "T2", name: "IP授權與合約簽訂", type: "GROUP", parent: null, startDate: "2026-05-14", endDate: "2027-02-28", progress: 40, status: "IN_PROGRESS", assignee: "Justine", color: "#0284c7", collapsed: false },
+            { id: "T2-1", name: "授權提案企劃＆授權申請", type: "TASK", parent: "T2", startDate: "2026-05-14", endDate: "2026-07-31", progress: 90, status: "IN_PROGRESS", assignee: "Justine", color: "#38bdf8" },
+            { id: "T2-2", name: "授權合約簽訂與審查", type: "TASK", parent: "T2", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Justine, 管理部", color: "#38bdf8" },
+            { id: "T2-3", name: "授權金頭款支付", type: "TASK", parent: "T2", startDate: "2026-09-01", endDate: "2026-09-15", progress: 0, status: "NOT_STARTED", assignee: "Justine, Zora", color: "#38bdf8" },
+            { id: "T2-4", name: "授權金尾款支付", type: "TASK", parent: "T2", startDate: "2027-02-01", endDate: "2027-02-28", progress: 0, status: "NOT_STARTED", assignee: "Justine, Zora", color: "#38bdf8" },
+
+            // 3. 異業合作
+            { id: "T3", name: "異業合作與通路發行", type: "GROUP", parent: null, startDate: "2026-08-01", endDate: "2026-10-15", progress: 20, status: "IN_PROGRESS", assignee: "Justine", color: "#059669", collapsed: false },
+            { id: "T3-1", name: "萌番寄售商品合作", type: "GROUP", parent: "T3", startDate: "2026-08-01", endDate: "2026-09-30", progress: 50, status: "IN_PROGRESS", assignee: "Justine", color: "#10b981", collapsed: false },
+            { id: "T3-1-1", name: "萌番寄售商品提案", type: "TASK", parent: "T3-1", startDate: "2026-08-01", endDate: "2026-08-20", progress: 100, status: "COMPLETED", assignee: "Justine", color: "#34d399" },
+            { id: "T3-1-2", name: "寄售合約簽訂", type: "TASK", parent: "T3-1", startDate: "2026-08-20", endDate: "2026-09-30", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#34d399" },
+
+            // 4. 展區內容與硬體設計
+            { id: "T4", name: "展覽內容與展區硬體設計", type: "GROUP", parent: null, startDate: "2026-06-26", endDate: "2027-01-30", progress: 25, status: "IN_PROGRESS", assignee: "Justine, 設計部", color: "#d97706", collapsed: false },
+            { id: "T4-1", name: "展區體驗與動線規劃草稿", type: "TASK", parent: "T4", startDate: "2026-06-26", endDate: "2026-07-13", progress: 100, status: "COMPLETED", assignee: "Justine", color: "#fbbf24" },
+            { id: "T4-2", name: "展區平面與3D設計稿製作", type: "TASK", parent: "T4", startDate: "2026-08-03", endDate: "2026-09-01", progress: 0, status: "NOT_STARTED", assignee: "Justine, Design", color: "#fbbf24" },
+            { id: "T4-3", name: "第一次展區設計監修送審 (日方14天)", type: "TASK", parent: "T4", startDate: "2026-09-04", endDate: "2026-09-21", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#f59e0b" },
+            { id: "T4-4", name: "第一次監修回覆與設計修改", type: "TASK", parent: "T4", startDate: "2026-09-22", endDate: "2026-09-25", progress: 0, status: "NOT_STARTED", assignee: "Justine, Chris", color: "#fbbf24" },
+            { id: "T4-5", name: "第二次設計圖監修送審 (日方14天)", type: "TASK", parent: "T4", startDate: "2026-09-28", endDate: "2026-10-12", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#f59e0b" },
+            { id: "T4-6", name: "展區平面設計過審", type: "MILESTONE", parent: "T4", startDate: "2026-11-27", endDate: "2026-11-27", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#d97706" },
+            { id: "T4-7", name: "展區實體打樣與工程發包", type: "TASK", parent: "T4", startDate: "2026-11-30", endDate: "2026-12-14", progress: 0, status: "NOT_STARTED", assignee: "Justine, 外包廠商", color: "#fbbf24" },
+            { id: "T4-8", name: "展區打樣過審與進場許可", type: "MILESTONE", parent: "T4", startDate: "2027-01-11", endDate: "2027-01-30", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#d97706" },
+
+            // 5. 周邊商品開發 (5大SOP流程)
+            { id: "T5", name: "周邊商品開發 (5大SOP流程)", type: "GROUP", parent: null, startDate: "2026-08-03", endDate: "2026-12-05", progress: 5, status: "IN_PROGRESS", assignee: "商品部, Paul, Chris, Justine", color: "#db2777", collapsed: false },
+
+            // 5.1 貼紙贈品類
+            { id: "T5-1", name: "贈品-貼紙組 (SOP流程)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-11-15", progress: 0, status: "IN_PROGRESS", assignee: "Paul, Chris", color: "#f472b6", collapsed: true },
+            { id: "T5-1-1", name: "廠商詢比議價", type: "TASK", parent: "T5-1", startDate: "2026-08-03", endDate: "2026-08-20", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
+            { id: "T5-1-2", name: "商品圖稿與包裝設計", type: "TASK", parent: "T5-1", startDate: "2026-08-20", endDate: "2026-09-05", progress: 0, status: "NOT_STARTED", assignee: "Chris", color: "#ec4899" },
+            { id: "T5-1-3", name: "設計圖送日方監修 (14天)", type: "TASK", parent: "T5-1", startDate: "2026-09-05", endDate: "2026-09-19", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#f472b6" },
+            { id: "T5-1-4", name: "廠商進打樣與打色", type: "TASK", parent: "T5-1", startDate: "2026-09-19", endDate: "2026-10-05", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
+            { id: "T5-1-5", name: "實體樣品日方監修 (14天)", type: "TASK", parent: "T5-1", startDate: "2026-10-05", endDate: "2026-10-19", progress: 0, status: "NOT_STARTED", assignee: "Justine, Chris", color: "#f472b6" },
+            { id: "T5-1-6", name: "大貨量產與盤點驗收入倉", type: "TASK", parent: "T5-1", startDate: "2026-10-19", endDate: "2026-11-15", progress: 0, status: "NOT_STARTED", assignee: "Paul, 商品部", color: "#ec4899" },
+
+            // 5.2 壓克力與徽章類
+            { id: "T5-2", name: "盲抽壓克力/徽章類 (御守/立牌/色紙 19款)", type: "GROUP", parent: "T5", startDate: "2026-08-10", endDate: "2026-11-30", progress: 0, status: "NOT_STARTED", assignee: "Paul, Chris, Justine", color: "#f472b6", collapsed: true },
+            { id: "T5-2-1", name: "規格規劃與廠商詢價比價", type: "TASK", parent: "T5-2", startDate: "2026-08-10", endDate: "2026-08-25", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
+            { id: "T5-2-2", name: "角色圖稿與拼板視覺繪製", type: "TASK", parent: "T5-2", startDate: "2026-08-25", endDate: "2026-09-10", progress: 0, status: "NOT_STARTED", assignee: "Chris", color: "#ec4899" },
+            { id: "T5-2-3", name: "設計圖日方監修審查 (14天)", type: "TASK", parent: "T5-2", startDate: "2026-09-10", endDate: "2026-09-24", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#f472b6" },
+            { id: "T5-2-4", name: "實體打樣與模具印製", type: "TASK", parent: "T5-2", startDate: "2026-09-24", endDate: "2026-10-10", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
+            { id: "T5-2-5", name: "實體打樣日方監修 (14天)", type: "TASK", parent: "T5-2", startDate: "2026-10-10", endDate: "2026-10-24", progress: 0, status: "NOT_STARTED", assignee: "Justine, Chris", color: "#f472b6" },
+            { id: "T5-2-6", name: "大貨生產、QC 品管與到貨入庫", type: "TASK", parent: "T5-2", startDate: "2026-10-24", endDate: "2026-11-30", progress: 0, status: "NOT_STARTED", assignee: "Paul, 商品部", color: "#ec4899" },
+
+            // 6. 物流與倉儲
+            { id: "T6", name: "倉儲、跨國物流與品管", type: "GROUP", parent: null, startDate: "2026-11-01", endDate: "2026-12-15", progress: 0, status: "NOT_STARTED", assignee: "商品部, 管理部", color: "#0891b2", collapsed: false },
+            { id: "T6-1", name: "庫存總盤點與包材準備", type: "TASK", parent: "T6", startDate: "2026-11-01", endDate: "2026-11-15", progress: 0, status: "NOT_STARTED", assignee: "商品部", color: "#06b6d4" },
+            { id: "T6-2", name: "國際/國內物流運送 (深圳/廣州-高雄)", type: "TASK", parent: "T6", startDate: "2026-11-15", endDate: "2026-12-05", progress: 0, status: "NOT_STARTED", assignee: "管理部", color: "#06b6d4" },
+            { id: "T6-3", name: "台灣倉庫進出貨與展前備貨", type: "TASK", parent: "T6", startDate: "2026-12-01", endDate: "2026-12-15", progress: 0, status: "NOT_STARTED", assignee: "商品部", color: "#06b6d4" },
+
+            // 7. 票務與宣傳
+            { id: "T7", name: "票務發行與整合行銷", type: "GROUP", parent: null, startDate: "2026-10-01", endDate: "2026-12-25", progress: 0, status: "NOT_STARTED", assignee: "行銷部, 設計部", color: "#2563eb", collapsed: false },
+            { id: "T7-1", name: "售票平台對接與測試 (ibon/Klook/KKday)", type: "TASK", parent: "T7", startDate: "2026-10-01", endDate: "2026-10-25", progress: 0, status: "NOT_STARTED", assignee: "行銷部, 管理部", color: "#3b82f6" },
+            { id: "T7-2", name: "宣傳主視覺與票券KV設計", type: "TASK", parent: "T7", startDate: "2026-10-20", endDate: "2026-11-10", progress: 0, status: "NOT_STARTED", assignee: "設計部", color: "#3b82f6" },
+            { id: "T7-3", name: "早鳥預售開賣與社群廣告投放", type: "TASK", parent: "T7", startDate: "2026-11-01", endDate: "2026-12-25", progress: 0, status: "NOT_STARTED", assignee: "行銷部", color: "#3b82f6" },
+
+            // 8. 進場與營運
+            { id: "T8", name: "進場施工與開展營運", type: "GROUP", parent: null, startDate: "2026-12-15", endDate: "2027-02-28", progress: 0, status: "NOT_STARTED", assignee: "活動部, 商品部, 行銷部", color: "#059669", collapsed: false },
+            { id: "T8-1", name: "展區木作裝潢與硬體進場", type: "TASK", parent: "T8", startDate: "2026-12-15", endDate: "2026-12-21", progress: 0, status: "NOT_STARTED", assignee: "活動部, 外包廠商", color: "#10b981" },
+            { id: "T8-2", name: "商品進場陳列與 POS 系統設定", type: "TASK", parent: "T8", startDate: "2026-12-18", endDate: "2026-12-22", progress: 0, status: "NOT_STARTED", assignee: "商品部", color: "#10b981" },
+            { id: "T8-3", name: "媒體日與正式開幕開展", type: "MILESTONE", parent: "T8", startDate: "2026-12-23", endDate: "2026-12-23", progress: 0, status: "NOT_STARTED", assignee: "行銷部, 活動部", color: "#047857" },
+
+            // 9. 撤場結案
+            { id: "T9", name: "撤場結案與財務結算", type: "GROUP", parent: null, startDate: "2027-03-01", endDate: "2027-03-20", progress: 0, status: "NOT_STARTED", assignee: "管理部, 活動部", color: "#64748b", collapsed: false },
+            { id: "T9-1", name: "展區拆除復原與場地點交", type: "TASK", parent: "T9", startDate: "2027-03-01", endDate: "2027-03-05", progress: 0, status: "NOT_STARTED", assignee: "活動部", color: "#94a3b8" },
+            { id: "T9-2", name: "專案總財務結算與分析報告", type: "TASK", parent: "T9", startDate: "2027-03-05", endDate: "2027-03-20", progress: 0, status: "NOT_STARTED", assignee: "管理部", color: "#94a3b8" }
+        ];
+
+        let state = {
+            tasks: [],
+            assignees: [...DEFAULT_ASSIGNEES],
+            viewMode: 'day', // 'day' | 'week' | 'month'
+            selectedTaskId: null,
+            showCriticalPath: false,
+            filterAssignee: ''
+        };
+
+        window.onload = function() {
+            loadFromStorage();
+            initAssigneeFilter();
+            renderGantt();
+            setupKeyboardShortcuts();
+            initPaneResizer();
+        };
+
+        function loadFromStorage() {
+            const savedTasks = localStorage.getItem('official_hunter_gantt_tasks_v2');
+            const savedAssignees = localStorage.getItem('official_hunter_gantt_assignees_v2');
+
+            if (savedTasks) {
+                try { state.tasks = JSON.parse(savedTasks); } catch(e) { state.tasks = JSON.parse(JSON.stringify(OFFICIAL_TASKS)); }
+            } else {
+                state.tasks = JSON.parse(JSON.stringify(OFFICIAL_TASKS));
+            }
+
+            if (savedAssignees) {
+                try { state.assignees = JSON.parse(savedAssignees); } catch(e) { state.assignees = [...DEFAULT_ASSIGNEES]; }
+            } else {
+                state.assignees = [...DEFAULT_ASSIGNEES];
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('official_hunter_gantt_tasks_v2', JSON.stringify(state.tasks));
+            localStorage.setItem('official_hunter_gantt_assignees_v2', JSON.stringify(state.assignees));
+        }
+
+        function resetData() {
+            state.tasks = JSON.parse(JSON.stringify(OFFICIAL_TASKS));
+            state.assignees = [...DEFAULT_ASSIGNEES];
+            saveToStorage();
+            initAssigneeFilter();
+            renderGantt();
+            showToast('已重置為《2026獵人實境解謎_高雄站》官方正式範本！', 'success');
+        }
+
+        function calculateWBSMap() {
+            const wbsMap = {};
+            function assignWBS(parentId, prefix) {
+                const children = state.tasks.filter(t => (t.parent === parentId || (!parentId && !t.parent)));
+                children.forEach((child, idx) => {
+                    const currentWBS = prefix ? `${prefix}.${idx + 1}` : `${idx + 1}`;
+                    wbsMap[child.id] = currentWBS;
+                    assignWBS(child.id, currentWBS);
+                });
+            }
+            assignWBS(null, '');
+            return wbsMap;
+        }
+
+        function getTaskDepth(taskId) {
+            let depth = 0;
+            let current = state.tasks.find(t => t.id === taskId);
+            while (current && current.parent) {
+                depth++;
+                current = state.tasks.find(t => t.id === current.parent);
+                if (depth > 10) break;
+            }
+            return depth;
+        }
+
+        function getDescendantIds(parentId) {
+            let descendants = [];
+            const children = state.tasks.filter(t => t.parent === parentId);
+            children.forEach(child => {
+                descendants.push(child.id);
+                descendants = descendants.concat(getDescendantIds(child.id));
+            });
+            return descendants;
+        }
+
+        function renderTaskList() {
+            const container = document.getElementById('taskListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const wbsMap = calculateWBSMap();
+
+            let filteredTasks = state.tasks.filter(t => {
+                if (state.filterAssignee) {
+                    if (!t.assignee || !t.assignee.includes(state.filterAssignee)) return false;
+                }
+                return true;
+            });
+
+            const hiddenTaskIds = new Set();
+            state.tasks.forEach(t => {
+                if (t.collapsed) {
+                    getDescendantIds(t.id).forEach(id => hiddenTaskIds.add(id));
+                }
+            });
+
+            filteredTasks.forEach(task => {
+                if (hiddenTaskIds.has(task.id)) return;
+
+                const depth = getTaskDepth(task.id);
+                const isSelected = state.selectedTaskId === task.id;
+                const children = state.tasks.filter(t => t.parent === task.id);
+                const hasChildren = children.length > 0 || task.type === 'GROUP';
+
+                const duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+                const isMilestone = task.type === 'MILESTONE';
+                const wbsCode = wbsMap[task.id] || '';
+
+                const row = document.createElement('div');
+                row.className = `task-row flex items-center px-3 py-2 text-xs border-b border-slate-100 cursor-pointer transition ${isSelected ? 'selected' : ''}`;
+                row.onclick = () => selectTask(task.id);
+                row.ondblclick = () => openTaskModal(task.id);
+
+                let icon = '<i class="fa-regular fa-file-lines text-slate-400 mr-1.5"></i>';
+                if (task.type === 'GROUP') icon = '<i class="fa-solid fa-folder-open text-amber-500 mr-1.5"></i>';
+                if (task.type === 'MILESTONE') icon = '<i class="fa-solid fa-diamond text-indigo-600 mr-1.5"></i>';
+
+                let collapseBtn = '';
+                if (hasChildren) {
+                    collapseBtn = `
+                        <button onclick="toggleCollapse('${task.id}'); event.stopPropagation();" class="mr-1 text-slate-400 hover:text-slate-600 w-4 h-4 flex items-center justify-center rounded">
+                            <i class="fa-solid ${task.collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[10px]"></i>
+                        </button>
+                    `;
+                } else {
+                    collapseBtn = `<span class="w-5 inline-block"></span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center flex-1 min-w-0 pr-2" style="padding-left: ${depth * 14}px">
+                        ${collapseBtn}
+                        ${icon}
+                        <span class="bg-slate-100 text-slate-600 font-mono text-[10px] px-1.5 py-0.5 rounded border border-slate-200 mr-1.5 shrink-0">${wbsCode}</span>
+                        <span class="truncate font-medium text-slate-700 hover:text-indigo-600" title="${task.name}">
+                            ${task.name}
+                        </span>
+                    </div>
+                    <div class="w-24 text-center truncate text-slate-500 text-[11px]" title="${task.assignee || '-'}">
+                        ${task.assignee ? `<span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">${task.assignee}</span>` : '-'}
+                    </div>
+                    <div class="w-12 text-center font-medium text-slate-600">${isMilestone ? '0天' : (isNaN(duration) ? '-' : duration + '天')}</div>
+                    <div class="w-12 text-right pr-1 font-semibold text-slate-700">${task.progress || 0}%</div>
+                    <div class="w-14 text-center flex items-center justify-center space-x-1">
+                        <button onclick="duplicateTask('${task.id}'); event.stopPropagation();" title="複製群組/任務及其子階層" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button onclick="createSubTask('${task.id}'); event.stopPropagation();" title="新增子任務 (Enter)" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+
+            updateMetrics();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (state.tasks.length === 0) return;
+
+            let minDate = dayjs('2026-04-01');
+            let maxDate = dayjs('2027-03-31');
+
+            state.tasks.forEach(t => {
+                if (t.startDate && dayjs(t.startDate).isValid() && dayjs(t.startDate).isBefore(minDate)) minDate = dayjs(t.startDate);
+                if (t.endDate && dayjs(t.endDate).isValid() && dayjs(t.endDate).isAfter(maxDate)) maxDate = dayjs(t.endDate);
+            });
+
+            minDate = minDate.subtract(3, 'day');
+            maxDate = maxDate.add(7, 'day');
+
+            const totalDays = maxDate.diff(minDate, 'day') + 1;
+            
+            let unitWidth = 40;
+            let stepDays = 1;
+            if (state.viewMode === 'week') {
+                unitWidth = 90;
+                stepDays = 7;
+            } else if (state.viewMode === 'month') {
+                unitWidth = 140;
+                stepDays = 30;
+            }
+
+            const totalUnits = Math.ceil(totalDays / stepDays);
+            const timelineWidth = totalUnits * unitWidth;
+
+            // Header
+            const headerRow = document.createElement('div');
+            headerRow.className = 'h-10 bg-slate-100 border-b border-slate-200 flex items-center sticky top-0 z-10 text-xs font-semibold text-slate-600';
+            headerRow.style.width = `${timelineWidth}px`;
+
+            for (let i = 0; i < totalUnits; i++) {
+                const currentDate = minDate.add(i * stepDays, 'day');
+                const isToday = currentDate.isSame(dayjs(), 'day');
+
+                let titleTop = currentDate.format('MM/DD');
+                let titleSub = currentDate.format('dd');
+
+                if (state.viewMode === 'week') {
+                    titleTop = `第 ${i + 1} 週`;
+                    titleSub = currentDate.format('MM/DD');
+                } else if (state.viewMode === 'month') {
+                    titleTop = currentDate.format('YYYY年');
+                    titleSub = currentDate.format('M月');
+                }
+
+                const dayCell = document.createElement('div');
+                dayCell.style.width = `${unitWidth}px`;
+                dayCell.className = `text-center shrink-0 border-r border-slate-200 h-full flex flex-col justify-center ${isToday ? 'bg-indigo-50 font-bold text-indigo-600' : ''}`;
+                dayCell.innerHTML = `
+                    <div class="text-[10px] text-slate-400">${titleTop}</div>
+                    <div>${titleSub}</div>
+                `;
+                headerRow.appendChild(dayCell);
+            }
+            container.appendChild(headerRow);
+
+            // Task Bars Body
+            const hiddenTaskIds = new Set();
+            state.tasks.forEach(t => {
+                if (t.collapsed) {
+                    getDescendantIds(t.id).forEach(id => hiddenTaskIds.add(id));
+                }
+            });
+
+            const bodyContainer = document.createElement('div');
+            bodyContainer.className = 'gantt-grid relative';
+            bodyContainer.style.width = `${timelineWidth}px`;
+            bodyContainer.style.backgroundSize = `${unitWidth}px 100%`;
+
+            state.tasks.forEach(task => {
+                if (hiddenTaskIds.has(task.id)) return;
+
+                const startOffsetDays = dayjs(task.startDate).diff(minDate, 'day');
+                const durationDays = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+
+                const leftPx = (startOffsetDays / stepDays) * unitWidth;
+                const widthPx = Math.max(((isNaN(durationDays) ? 1 : durationDays) / stepDays) * unitWidth - 4, 12);
+
+                const row = document.createElement('div');
+                row.className = 'h-9 border-b border-slate-100 flex items-center relative';
+
+                if (task.type === 'MILESTONE') {
+                    const diamond = document.createElement('div');
+                    diamond.className = 'absolute w-4 h-4 bg-indigo-600 rotate-45 border-2 border-white shadow cursor-pointer hover:scale-125 transition transform';
+                    diamond.style.left = `${leftPx + unitWidth / 2 - 8}px`;
+                    diamond.title = `${task.name} (${task.startDate})`;
+                    diamond.onclick = () => openTaskModal(task.id);
+                    row.appendChild(diamond);
+                } else {
+                    const bar = document.createElement('div');
+                    const isGroup = task.type === 'GROUP';
+                    const bgColor = task.color || (isGroup ? '#3b82f6' : '#6366f1');
+                    const isCritical = state.showCriticalPath && (task.progress < 100) && (dayjs(task.endDate).isBefore(dayjs().add(14, 'day')));
+
+                    bar.className = `absolute h-6 rounded-md shadow-xs flex items-center px-2 text-[11px] text-white font-medium cursor-pointer hover:brightness-110 transition overflow-hidden ${isCritical ? 'critical-bar' : ''}`;
+                    bar.style.left = `${Math.max(leftPx, 0) + 2}px`;
+                    bar.style.width = `${widthPx}px`;
+                    bar.style.backgroundColor = bgColor;
+                    bar.onclick = () => openTaskModal(task.id);
+
+                    const progressOverlay = document.createElement('div');
+                    progressOverlay.className = 'absolute left-0 top-0 bottom-0 bg-black/20 rounded-l-md pointer-events-none';
+                    progressOverlay.style.width = `${task.progress || 0}%`;
+                    bar.appendChild(progressOverlay);
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'relative z-10 truncate';
+                    titleSpan.innerText = task.name;
+                    bar.appendChild(titleSpan);
+
+                    row.appendChild(bar);
+                }
+
+                bodyContainer.appendChild(row);
+            });
+
+            container.appendChild(bodyContainer);
+        }
+
+        function renderGantt() {
+            renderTaskList();
+            renderTimeline();
+        }
+
+        function setViewMode(mode) {
+            state.viewMode = mode;
+            document.getElementById('btnViewDay').className = mode === 'day' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
+            document.getElementById('btnViewWeek').className = mode === 'week' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
+            document.getElementById('btnViewMonth').className = mode === 'month' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
+            renderGantt();
+            showToast(`已切換為「${mode === 'day' ? '日' : mode === 'week' ? '週' : '月'}」檢視視角`, 'info');
+        }
+
+        function onStartDateChange() {
+            const startStr = document.getElementById('taskStartDate').value;
+            const endStr = document.getElementById('taskEndDate').value;
+            const durationInput = document.getElementById('taskDuration');
+
+            if (startStr && endStr) {
+                let duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
+                if (duration < 1) {
+                    duration = 1;
+                    document.getElementById('taskEndDate').value = startStr;
+                }
+                durationInput.value = duration;
+            }
+        }
+
+        function onEndDateChange() {
+            const startStr = document.getElementById('taskStartDate').value;
+            const endStr = document.getElementById('taskEndDate').value;
+            const durationInput = document.getElementById('taskDuration');
+
+            if (startStr && endStr) {
+                let duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
+                if (duration < 1) {
+                    duration = 1;
+                    document.getElementById('taskStartDate').value = endStr;
+                }
+                durationInput.value = duration;
+            }
+        }
+
+        function onDurationChange() {
+            const startStr = document.getElementById('taskStartDate').value;
+            const duration = parseInt(document.getElementById('taskDuration').value) || 1;
+
+            if (startStr && duration > 0) {
+                const newEndDate = dayjs(startStr).add(duration - 1, 'day').format('YYYY-MM-DD');
+                document.getElementById('taskEndDate').value = newEndDate;
+            }
+        }
+
+        function handleTaskTypeChange() {
+            const type = document.getElementById('taskType').value;
+            const durationInput = document.getElementById('taskDuration');
+            if (type === 'MILESTONE') {
+                durationInput.value = 0;
+                durationInput.disabled = true;
+                onDurationChange();
+            } else {
+                durationInput.disabled = false;
+                if (parseInt(durationInput.value) === 0) durationInput.value = 1;
+                onDurationChange();
+            }
+        }
+
+        function initAssigneeFilter() {
+            const select = document.getElementById('filterAssignee');
+            if (!select) return;
+            select.innerHTML = '<option value="">全部負責人 / 單位</option>';
+            state.assignees.forEach(name => {
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        function renderAssigneeCheckboxes(selectedAssignees = '') {
+            const container = document.getElementById('assigneeCheckboxes');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const selectedArray = selectedAssignees ? selectedAssignees.split(',').map(s => s.trim()) : [];
+
+            state.assignees.forEach(name => {
+                const isChecked = selectedArray.includes(name);
+                const tag = document.createElement('label');
+                tag.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition ${isChecked ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
+                tag.innerHTML = `
+                    <input type="checkbox" value="${name}" ${isChecked ? 'checked' : ''} onchange="updateAssigneeTagStyle(this)" class="hidden">
+                    <span>${name}</span>
+                    <i class="fa-solid fa-xmark text-[10px] ml-1 opacity-60 hover:opacity-100 hover:text-rose-300 cursor-pointer" onclick="deleteAssignee('${name}', event)" title="刪除此選單項目"></i>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        function updateAssigneeTagStyle(checkbox) {
+            const label = checkbox.parentElement;
+            if (checkbox.checked) {
+                label.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition bg-indigo-600 text-white';
+            } else {
+                label.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition bg-slate-200 text-slate-700 hover:bg-slate-300';
+            }
+        }
+
+        function addNewAssigneeOption() {
+            const input = document.getElementById('newAssigneeInput');
+            const newName = input.value.trim();
+            if (newName && !state.assignees.includes(newName)) {
+                state.assignees.push(newName);
+                saveToStorage();
+                initAssigneeFilter();
+                renderAssigneeCheckboxes(getSelectedAssigneesString());
+                input.value = '';
+                showToast(`已新增負責人/單位選項: ${newName}`, 'success');
+            }
+        }
+
+        function deleteAssignee(name, event) {
+            if (event) event.stopPropagation();
+            state.assignees = state.assignees.filter(a => a !== name);
+            saveToStorage();
+            initAssigneeFilter();
+            renderAssigneeCheckboxes(getSelectedAssigneesString());
+            showToast(`已刪除負責人選單項目：${name}`, 'info');
+        }
+
+        function getSelectedAssigneesString() {
+            const checkedBoxes = document.querySelectorAll('#assigneeCheckboxes input[type="checkbox"]:checked');
+            return Array.from(checkedBoxes).map(cb => cb.value).join(', ');
+        }
+
+        function selectTask(taskId) {
+            state.selectedTaskId = taskId;
+            renderTaskList();
+        }
+
+        function toggleExpandAll() {
+            const anyCollapsed = state.tasks.some(t => t.collapsed);
+            state.tasks.forEach(t => {
+                t.collapsed = !anyCollapsed;
+            });
+            saveToStorage();
+            renderGantt();
+            showToast(anyCollapsed ? '已展開所有任務群組' : '已收合所有任務群組', 'info');
+        }
+
+        function openTaskModal(taskId = null) {
+            const modal = document.getElementById('taskModal');
+            const form = document.getElementById('taskForm');
+            if (!modal || !form) return;
+            form.reset();
+
+            populateParentDropdown(taskId);
+
+            if (taskId) {
+                const task = state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                document.getElementById('modalTitle').innerText = '編輯任務屬性';
+                document.getElementById('taskId').value = task.id;
+                document.getElementById('taskName').value = task.name;
+                document.getElementById('taskType').value = task.type || 'TASK';
+                document.getElementById('taskParent').value = task.parent || '';
+                document.getElementById('taskStartDate').value = task.startDate;
+                document.getElementById('taskEndDate').value = task.endDate;
+
+                const duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+                document.getElementById('taskDuration').value = task.type === 'MILESTONE' ? 0 : (isNaN(duration) ? 1 : duration);
+
+                document.getElementById('taskProgress').value = task.progress || 0;
+                document.getElementById('taskStatus').value = task.status || 'NOT_STARTED';
+
+                renderAssigneeCheckboxes(task.assignee || '');
+                document.getElementById('btnDeleteTask').classList.remove('hidden');
+                document.getElementById('btnDuplicateTask').classList.remove('hidden');
+            } else {
+                document.getElementById('modalTitle').innerText = '新增任務';
+                document.getElementById('taskId').value = '';
+                document.getElementById('taskStartDate').value = dayjs().format('YYYY-MM-DD');
+                document.getElementById('taskEndDate').value = dayjs().add(5, 'day').format('YYYY-MM-DD');
+                document.getElementById('taskDuration').value = 6;
+
+                if (state.selectedTaskId) {
+                    document.getElementById('taskParent').value = state.selectedTaskId;
+                }
+
+                renderAssigneeCheckboxes('');
+                document.getElementById('btnDeleteTask').classList.add('hidden');
+                document.getElementById('btnDuplicateTask').classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeTaskModal() {
+            const modal = document.getElementById('taskModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function populateParentDropdown(currentTaskId) {
+            const select = document.getElementById('taskParent');
+            if (!select) return;
+            select.innerHTML = '<option value="">(無 - 最頂層)</option>';
+
+            function addOptions(parentId = null, prefix = '') {
+                const children = state.tasks.filter(t => (t.parent === parentId || (!parentId && !t.parent)) && t.id !== currentTaskId);
+                children.forEach(child => {
+                    select.innerHTML += `<option value="${child.id}">${prefix}${child.name}</option>`;
+                    addOptions(child.id, prefix + '└─ ');
+                });
+            }
+
+            addOptions(null, '');
+        }
+
+        function handleTaskFormSubmit(e) {
+            e.preventDefault();
+
+            const taskId = document.getElementById('taskId').value;
+            const name = document.getElementById('taskName').value;
+            const type = document.getElementById('taskType').value;
+            const parent = document.getElementById('taskParent').value || null;
+            const startDate = document.getElementById('taskStartDate').value;
+            const endDate = document.getElementById('taskEndDate').value;
+            const progress = parseInt(document.getElementById('taskProgress').value) || 0;
+            const status = document.getElementById('taskStatus').value;
+            const assignee = getSelectedAssigneesString();
+
+            if (taskId) {
+                const task = state.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.name = name;
+                    task.type = type;
+                    task.parent = parent;
+                    task.startDate = startDate;
+                    task.endDate = endDate;
+                    task.progress = progress;
+                    task.status = status;
+                    task.assignee = assignee;
+                }
+            } else {
+                const newId = 'T-' + Date.now().toString().slice(-5);
+                const newTask = {
+                    id: newId,
+                    name,
+                    type,
+                    parent,
+                    startDate,
+                    endDate,
+                    progress,
+                    status,
+                    assignee,
+                    color: '#6366f1'
+                };
+                state.tasks.push(newTask);
+            }
+
+            saveToStorage();
+            renderGantt();
+            closeTaskModal();
+            showToast('任務屬性已成功儲存！', 'success');
+        }
+
+        function createSubTask(parentId) {
+            const parentTask = state.tasks.find(t => t.id === parentId);
+            if (!parentTask) return;
+
+            parentTask.collapsed = false;
+
+            const newId = 'T-' + Date.now().toString().slice(-5);
+            const newSubTask = {
+                id: newId,
+                name: "新階層子任務",
+                type: "TASK",
+                parent: parentId,
+                startDate: parentTask.startDate,
+                endDate: parentTask.endDate,
+                progress: 0,
+                status: "NOT_STARTED",
+                assignee: parentTask.assignee || "",
+                color: "#6366f1"
+            };
+
+            const index = state.tasks.findIndex(t => t.id === parentId);
+            state.tasks.splice(index + 1, 0, newSubTask);
+
+            state.selectedTaskId = newId;
+            saveToStorage();
+            renderGantt();
+            openTaskModal(newId);
+        }
+
+        function duplicateTask(taskId) {
+            const rootTask = state.tasks.find(t => t.id === taskId);
+            if (!rootTask) return;
+
+            const subtreeIds = [taskId, ...getDescendantIds(taskId)];
+            const subtreeTasks = state.tasks.filter(t => subtreeIds.includes(t.id));
+
+            const idMap = {};
+            const now = Date.now();
+            subtreeTasks.forEach((t, idx) => {
+                idMap[t.id] = 'T-' + (now + idx) + '-' + Math.random().toString(36).substring(2, 5);
+            });
+
+            const clonedTasks = subtreeTasks.map(t => {
+                const isRoot = (t.id === taskId);
+                return {
+                    ...JSON.parse(JSON.stringify(t)),
+                    id: idMap[t.id],
+                    name: isRoot ? `${t.name} (副本)` : t.name,
+                    parent: isRoot ? t.parent : idMap[t.parent]
+                };
+            });
+
+            let lastIndex = -1;
+            state.tasks.forEach((t, idx) => {
+                if (subtreeIds.includes(t.id)) lastIndex = idx;
+            });
+
+            if (lastIndex !== -1) {
+                state.tasks.splice(lastIndex + 1, 0, ...clonedTasks);
+            } else {
+                state.tasks.push(...clonedTasks);
+            }
+
+            state.selectedTaskId = idMap[taskId];
+            saveToStorage();
+            renderGantt();
+            showToast(`已連動複製群組/任務「${rootTask.name}」及其所有階層子項目！`, 'success');
+        }
+
+        function duplicateCurrentTaskFromModal() {
+            const id = document.getElementById('taskId').value;
+            if (!id) return;
+            closeTaskModal();
+            duplicateTask(id);
+        }
+
+        function deleteCurrentTask() {
+            const id = document.getElementById('taskId').value;
+            if (!id) return;
+
+            const descendantIds = getDescendantIds(id);
+            const toDeleteIds = [id, ...descendantIds];
+
+            state.tasks = state.tasks.filter(t => !toDeleteIds.includes(t.id));
+            saveToStorage();
+            renderGantt();
+            closeTaskModal();
+            showToast('已刪除該任務及其所有關聯子項目！', 'info');
+        }
+
+        function toggleCollapse(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.collapsed = !task.collapsed;
+                saveToStorage();
+                renderGantt();
+            }
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('taskModal');
+                const importModal = document.getElementById('importModal');
+                const isModalOpen = (modal && !modal.classList.contains('hidden')) || (importModal && !importModal.classList.contains('hidden'));
+
+                if (e.key === 'Enter' && state.selectedTaskId && !isModalOpen) {
+                    e.preventDefault();
+                    createSubTask(state.selectedTaskId);
+                }
+            });
+        }
+
+        function initPaneResizer() {
+            const resizer = document.getElementById('paneResizer');
+            const leftPane = document.getElementById('leftPane');
+            if (!resizer || !leftPane) return;
+            let isResizing = false;
+
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                resizer.classList.add('resizing');
+                document.body.style.cursor = 'col-resize';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const newWidth = e.clientX;
+                if (newWidth > 220 && newWidth < 700) {
+                    leftPane.style.width = `${newWidth}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    resizer.classList.remove('resizing');
+                    document.body.style.cursor = 'default';
+                }
+            });
+        }
+
+        function applyFilters() {
+            const select = document.getElementById('filterAssignee');
+            if (select) state.filterAssignee = select.value;
+            renderGantt();
+        }
+
+        function scrollToToday() {
+            const container = document.getElementById('rightPane');
+            if (container) container.scrollLeft = 200;
+        }
+
+        function toggleCriticalPath() {
+            state.showCriticalPath = !state.showCriticalPath;
+            renderGantt();
+            showToast(state.showCriticalPath ? '已啟用關鍵路徑高亮顯示' : '已關閉關鍵路徑顯示', 'info');
+        }
+
+        function exportJSON() {
+            const titleElem = document.getElementById('projectTitle');
+            const exportObj = {
+                title: titleElem ? titleElem.innerText.replace("官方正式版", "").trim() : "專案甘特圖正式版",
+                subtext: "展覽籌備、授權、製作、行銷與營運時程甘特圖",
+                tasks: state.tasks,
+                assigneeList: state.assignees
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `official_gantt_hunter_${dayjs().format('YYYYMMDD_HHmm')}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('已匯出《2026獵人實境解謎_高雄站》官方正式 JSON 資料！', 'success');
+        }
+
+        function openImportModal() {
+            const modal = document.getElementById('importModal');
+            if (!modal) return;
+            document.getElementById('jsonTextArea').value = '';
+            document.getElementById('jsonFileInput').value = '';
+            modal.classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            const modal = document.getElementById('importModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function importJSON(event) {
+            if (event && event.target && event.target.files && event.target.files[0]) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const text = evt.target.result;
+                        const jsonTextArea = document.getElementById('jsonTextArea');
+                        if (jsonTextArea) jsonTextArea.value = text;
+                        
+                        const parsed = JSON.parse(text);
+                        let loadedTasks = [];
+
+                        if (Array.isArray(parsed)) {
+                            loadedTasks = parsed;
+                        } else if (parsed && Array.isArray(parsed.tasks)) {
+                            loadedTasks = parsed.tasks;
+                            if (Array.isArray(parsed.assigneeList)) {
+                                state.assignees = Array.from(new Set([...state.assignees, ...parsed.assigneeList]));
+                            }
+                            if (parsed.title) {
+                                const titleElem = document.getElementById('projectTitle');
+                                if (titleElem) {
+                                    titleElem.innerHTML = `${parsed.title} <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">官方正式版</span>`;
+                                }
+                            }
+                        } else {
+                            showToast('格式錯誤：JSON 必須為任務陣列或包含 tasks 的物件', 'warning');
+                            return;
+                        }
+
+                        state.tasks = loadedTasks;
+                        saveToStorage();
+                        initAssigneeFilter();
+                        renderGantt();
+                        closeImportModal();
+                        showToast('已成功匯入專案 JSON 資料！', 'success');
+                    } catch(err) {
+                        showToast('JSON 解析失敗，請確認格式是否正確', 'warning');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        window.importJSON = importJSON;
+
+        function handleImportJSON() {
+            const text = document.getElementById('jsonTextArea').value.trim();
+            if (!text) {
+                showToast('請貼上 JSON 內容或選擇檔案', 'warning');
+                return;
+            }
+            try {
+                const parsed = JSON.parse(text);
+                let loadedTasks = [];
+
+                if (Array.isArray(parsed)) {
+                    loadedTasks = parsed;
+                } else if (parsed && Array.isArray(parsed.tasks)) {
+                    loadedTasks = parsed.tasks;
+                    if (Array.isArray(parsed.assigneeList)) {
+                        state.assignees = Array.from(new Set([...state.assignees, ...parsed.assigneeList]));
+                    }
+                    if (parsed.title) {
+                        const titleElem = document.getElementById('projectTitle');
+                        if (titleElem) {
+                            titleElem.innerHTML = `${parsed.title} <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">官方正式版</span>`;
+                        }
+                    }
+                } else {
+                    showToast('格式錯誤：JSON 必須為任務陣列或包含 tasks 的物件', 'warning');
+                    return;
+                }
+
+                state.tasks = loadedTasks;
+                saveToStorage();
+                initAssigneeFilter();
+                renderGantt();
+                closeImportModal();
+                showToast('已成功匯入專案 JSON 資料！', 'success');
+            } catch(err) {
+                showToast('JSON 解析失敗，請確認格式是否正確', 'warning');
+            }
+        }
+
+        function updateMetrics() {
+            const total = state.tasks.length;
+            const completed = state.tasks.filter(t => t.status === 'COMPLETED').length;
+            const inProgress = state.tasks.filter(t => t.status === 'IN_PROGRESS').length;
+
+            let totalProgressSum = 0;
+            state.tasks.forEach(t => totalProgressSum += (t.progress || 0));
+            const avgProgress = total > 0 ? Math.round(totalProgressSum / total) : 0;
+
+            const elemTotal = document.getElementById('metricTotalTasks');
+            const elemInProgress = document.getElementById('metricInProgress');
+            const elemCompleted = document.getElementById('metricCompleted');
+            const elemBar = document.getElementById('metricProgressBar');
+            const elemText = document.getElementById('metricProgressText');
+
+            if (elemTotal) elemTotal.innerText = total;
+            if (elemInProgress) elemInProgress.innerText = inProgress;
+            if (elemCompleted) elemCompleted.innerText = completed;
+            if (elemBar) elemBar.style.width = `${avgProgress}%`;
+            if (elemText) elemText.innerText = `${avgProgress}%`;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-slate-800';
+            toast.className = `toast fixed bottom-5 right-5 ${bgClass} text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 z-50`;
+            toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
