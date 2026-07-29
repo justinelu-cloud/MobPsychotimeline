@@ -1,8 +1,11 @@
 <style>
-    /* STREAMING_CHUNK:Configuring custom styles and scrollbar animations... */
+    /* STREAMING_CHUNK:Defining core CSS layout, fallback modal hiding, and scrollbar styles... */
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         overflow-x: hidden;
+    }
+    .hidden {
+        display: none !important;
     }
     .gantt-grid {
         background-size: 40px 100%;
@@ -50,7 +53,7 @@
         100% { opacity: 0; transform: translateY(-20px); }
     }
 </style>
-<!-- STREAMING_CHUNK:Building application header and interactive controls... -->
+<!-- STREAMING_CHUNK:Rendering navigation header toolbar... -->
 <!-- Header Toolbar -->
 <header class="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm z-20 shrink-0">
     <div class="flex items-center space-x-3">
@@ -114,7 +117,7 @@
     </div>
 </header>
 
-<!-- STREAMING_CHUNK:Rendering progress metrics bar... -->
+<!-- STREAMING_CHUNK:Rendering project status dashboard bar... -->
 <!-- Metrics Dashboard -->
 <div class="bg-white border-b border-slate-200 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs shrink-0 z-10 shadow-xs">
     <div class="flex items-center space-x-6">
@@ -144,7 +147,7 @@
     </div>
 </div>
 
-<!-- STREAMING_CHUNK:Constructing split-pane Gantt container... -->
+<!-- STREAMING_CHUNK:Constructing split-pane workspace... -->
 <!-- Main Gantt Workspace -->
 <div class="flex-1 flex overflow-hidden relative">
 
@@ -180,7 +183,7 @@
     </div>
 </div>
 
-<!-- STREAMING_CHUNK:Creating task edit modal dialog... -->
+<!-- STREAMING_CHUNK:Building modal overlays... -->
 <!-- Task Modal (Create & Edit) -->
 <div id="taskModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 transform transition-all">
@@ -307,14 +310,16 @@
     </div>
 </div>
 
-<!-- STREAMING_CHUNK:Embedding Mob Psycho 100 project dataset and state initialization... -->
+<!-- STREAMING_CHUNK:Configuring pure JavaScript execution block without syntax errors... -->
 <script>
-    const MOB_PSYCHO_ASSIGNEES = [
+    /* JS Assignees Dataset */
+    var MOB_PSYCHO_ASSIGNEES = [
         "Justine", "Zora", "Zoya", "Chris", "Jerry", "Paul",
         "活動部", "商品部", "管理部", "行銷部", "設計部", "Sales", "Design", "外包廠商"
     ];
 
-    const MOB_PSYCHO_TASKS = [
+    /* JS Tasks Dataset */
+    var MOB_PSYCHO_TASKS = [
         { id: "T1", name: "1 策略與合約", type: "GROUP", parent: "", startDate: "2026-08-01", endDate: "2026-08-25", progress: 60, status: "IN_PROGRESS", assignee: "Justine", color: "#4f46e5", collapsed: false },
         { id: "T1-1", name: "1.1 專案內部提案", type: "TASK", parent: "T1", startDate: "2026-04-01", endDate: "2026-04-30", progress: 100, status: "COMPLETED", assignee: "Justine, Jerry", color: "#6366f1" },
         { id: "T1-3", name: "1.3 預算表", type: "TASK", parent: "T1", startDate: "2026-07-21", endDate: "2026-07-21", progress: 100, status: "COMPLETED", assignee: "Justine", color: "#6366f1" },
@@ -352,60 +357,14 @@
 
         { id: "T-1785290683030-vi7", name: "海報", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
         { id: "T-1785290683031-wx3", name: "詢比議", type: "TASK", parent: "T-1785290683030-vi7", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
-        { id: "T-1785290683032-ux2", name: "商品設計圖製作", type: "TASK", parent: "T-1785290683030-vi7", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Chris", color: "#ec4899" },
-        { id: "T-1785290683033-p5h", name: "設計圖監修", type: "TASK", parent: "T-1785290683030-vi7", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "", color: "#f472b6" },
-        { id: "T-1785290683034-xif", name: "商品打樣", type: "TASK", parent: "T-1785290683030-vi7", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
 
         { id: "T-1785290710397-rx1", name: "打卡禮-運勢籤卡", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290710398-tcr", name: "詢比議", type: "TASK", parent: "T-1785290710397-rx1", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
-
         { id: "T-1785290720417-mgd", name: "角色小卡", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290720418-wcp", name: "詢比議", type: "TASK", parent: "T-1785290720417-mgd", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "NOT_STARTED", assignee: "Paul", color: "#ec4899" },
-
         { id: "T-1785290737496-qpw", name: "機台-收藏卡", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
         { id: "T-1785290737423-5q6", name: "不織布提袋", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
         { id: "T-1785290753162-ghk", name: "盲抽壓克力御守(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
         { id: "T-1785290752955-spm", name: "盲抽冰箱磁鐵(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
         { id: "T-1785290752765-s3j", name: "A4資料夾", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290752579-0jr", name: "盲抽壓克力書籤A組(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290792645-c84", name: "盲抽壓克力書籤B組(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290791954-5u2", name: "盲抽壓克力書籤C組(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290791745-o80", name: "盲抽浮雕馬口鐵徽章(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290791519-23z", name: "光柵胸章(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290791295-gom", name: "盲抽炫彩色紙(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290791064-fsd", name: "拍立得風明信片組(6入一組)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290790732-qmk", name: "盲抽雙閃徽章(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290790514-5k2", name: "花澤輝氣壓克力尺(一組2入)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290861036-d9n", name: "錢幣金屬鑰匙圈", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290860827-4kw", name: "雙面造型壓克力夾(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290860628-cq1", name: "迷你相框磁鐵貼", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290860407-pze", name: "行李箱貼紙(8入一組)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290860193-cvk", name: "盲抽炫彩壓克力色紙(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290896025-hp7", name: "除靈鹽袋掛飾", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290895833-rb8", name: "壓克力摺疊手機造型吊飾(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290895656-xpo", name: "陶瓷杯墊", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290895455-q9p", name: "壓克力搖搖立牌(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290790133-usc", name: "轉盤鑰匙圈", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290749759-hb7", name: "景深壓克力繪馬吊飾(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290965883-tlz", name: "襪子", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290965493-8vj", name: "動物耳饅頭娃吊飾(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290965080-0hb", name: "炫彩壓克力立牌", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290964637-qov", name: "小酒窩絨毛鑰匙圈(6x6)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785290964097-gdl", name: "抽拉壓克力鑰匙圈", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291017183-7im", name: "搖搖樂鑰匙圈(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291016937-93z", name: "A3掛軸", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291016666-1ob", name: "盲抽壓克力磚(隨機出貨)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291016298-b1v", name: "果凍斜背包", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291015862-kgo", name: "發光旅充", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291063394-ufg", name: "布面滑鼠墊(60x40)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291066026-5na", name: "毛巾(100x30）", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291065843-l7d", name: "冷氣毯(145*85)", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291065656-3sh", name: "手鍊", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291063203-x8e", name: "絨毛包", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291062963-ho5", name: "T-Shirt", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291062768-ive", name: "壓克力夜燈", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291125852-6fu", name: "雙人床包套組", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
-        { id: "T-1785291125589-hqe", name: "金屬海報", type: "GROUP", parent: "T5", startDate: "2026-08-03", endDate: "2026-08-31", progress: 0, status: "IN_PROGRESS", assignee: "Paul", color: "#f472b6", collapsed: true },
 
         { id: "T-80607", name: "行銷宣傳", type: "GROUP", parent: "", startDate: "2027-01-04", endDate: "2027-05-02", progress: 0, status: "NOT_STARTED", assignee: "Zoya", color: "#2563eb", collapsed: false },
         { id: "T-27745", name: "進場", type: "MILESTONE", parent: "", startDate: "2027-03-22", endDate: "2027-03-25", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#059669" },
@@ -414,17 +373,17 @@
         { id: "T-92498", name: "結案報告", type: "GROUP", parent: "", startDate: "2027-05-28", endDate: "2027-05-28", progress: 0, status: "NOT_STARTED", assignee: "Justine", color: "#64748b", collapsed: false }
     ];
 
-    let state = {
+    var state = {
         tasks: [],
-        assignees: [...MOB_PSYCHO_ASSIGNEES],
-        viewMode: 'day', // 'day' | 'week' | 'month'
+        assignees: MOB_PSYCHO_ASSIGNEES.slice(),
+        viewMode: 'day',
         selectedTaskId: null,
         showCriticalPath: false,
         filterAssignee: ''
     };
 
     window.onload = function() {
-        const loadedFromURL = checkAndLoadFromURLHash();
+        var loadedFromURL = checkAndLoadFromURLHash();
         if (!loadedFromURL) {
             loadFromStorage();
         }
@@ -434,24 +393,24 @@
         initPaneResizer();
     };
 
-    /* STREAMING_CHUNK:Handling URL Hash link decoding and load logic... */
+    /* STREAMING_CHUNK:JS Function to check URL Hash data... */
     function checkAndLoadFromURLHash() {
         try {
-            const hash = window.location.hash;
-            if (hash && hash.startsWith('#data=')) {
-                const encodedData = hash.substring(6);
-                const jsonString = decodeURIComponent(atob(encodedData));
-                const parsed = JSON.parse(jsonString);
+            var hash = window.location.hash;
+            if (hash && hash.indexOf('#data=') === 0) {
+                var encodedData = hash.substring(6);
+                var jsonString = decodeURIComponent(atob(encodedData));
+                var parsed = JSON.parse(jsonString);
 
                 if (parsed && Array.isArray(parsed.tasks)) {
                     state.tasks = parsed.tasks;
                     if (Array.isArray(parsed.assigneeList)) {
-                        state.assignees = Array.from(new Set([...MOB_PSYCHO_ASSIGNEES, ...parsed.assigneeList]));
+                        state.assignees = Array.from(new Set(MOB_PSYCHO_ASSIGNEES.concat(parsed.assigneeList)));
                     }
                     if (parsed.title) {
-                        const titleElem = document.getElementById('projectTitle');
+                        var titleElem = document.getElementById('projectTitle');
                         if (titleElem) {
-                            titleElem.innerHTML = `${parsed.title} <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">分享檢視版</span>`;
+                            titleElem.innerHTML = parsed.title + ' <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">分享檢視版</span>';
                         }
                     }
                     saveToStorage();
@@ -467,19 +426,19 @@
 
     function generateShareLink() {
         try {
-            const titleElem = document.getElementById('projectTitle');
-            const exportObj = {
+            var titleElem = document.getElementById('projectTitle');
+            var exportObj = {
                 title: titleElem ? titleElem.innerText.replace("官方正式版", "").replace("分享檢視版", "").trim() : "路人超能100期間限定店專案時程",
                 subtext: "展覽籌備、授權、製作、行銷與營運時程甘特圖",
                 tasks: state.tasks,
                 assigneeList: state.assignees
             };
 
-            const jsonString = JSON.stringify(exportObj);
-            const encodedData = btoa(encodeURIComponent(jsonString));
-            const shareURL = `${window.location.origin}${window.location.pathname}#data=${encodedData}`;
+            var jsonString = JSON.stringify(exportObj);
+            var encodedData = btoa(encodeURIComponent(jsonString));
+            var shareURL = window.location.origin + window.location.pathname + '#data=' + encodedData;
 
-            const dummyInput = document.createElement('input');
+            var dummyInput = document.createElement('input');
             document.body.appendChild(dummyInput);
             dummyInput.value = shareURL;
             dummyInput.select();
@@ -492,27 +451,17 @@
         }
     }
 
-    /* STREAMING_CHUNK:Managing local browser storage operations... */
+    /* STREAMING_CHUNK:JS Functions for Storage... */
     function loadFromStorage() {
-        const savedTasks = localStorage.getItem('mob_psycho_gantt_tasks_v1');
-        const savedAssignees = localStorage.getItem('mob_psycho_gantt_assignees_v1');
-
-        if (savedTasks) {
-            try { state.tasks = JSON.parse(savedTasks); } catch(e) { state.tasks = JSON.parse(JSON.stringify(MOB_PSYCHO_TASKS)); }
-        } else {
-            state.tasks = JSON.parse(JSON.stringify(MOB_PSYCHO_TASKS));
-        }
-
-        if (savedAssignees) {
-            try { state.assignees = JSON.parse(savedAssignees); } catch(e) { state.assignees = [...MOB_PSYCHO_ASSIGNEES]; }
-        } else {
-            state.assignees = [...MOB_PSYCHO_ASSIGNEES];
-        }
+        state.tasks = JSON.parse(JSON.stringify(MOB_PSYCHO_TASKS));
+        state.assignees = MOB_PSYCHO_ASSIGNEES.slice();
     }
 
     function saveToStorage() {
-        localStorage.setItem('mob_psycho_gantt_tasks_v1', JSON.stringify(state.tasks));
-        localStorage.setItem('mob_psycho_gantt_assignees_v1', JSON.stringify(state.assignees));
+        try {
+            localStorage.setItem('mob_psycho_gantt_tasks_v1', JSON.stringify(state.tasks));
+            localStorage.setItem('mob_psycho_gantt_assignees_v1', JSON.stringify(state.assignees));
+        } catch(e) {}
     }
 
     function resetData() {
@@ -520,20 +469,20 @@
             history.pushState("", document.title, window.location.pathname + window.location.search);
         }
         state.tasks = JSON.parse(JSON.stringify(MOB_PSYCHO_TASKS));
-        state.assignees = [...MOB_PSYCHO_ASSIGNEES];
+        state.assignees = MOB_PSYCHO_ASSIGNEES.slice();
         saveToStorage();
         initAssigneeFilter();
         renderGantt();
         showToast('已成功重置為《路人超能100期間限定店》預設範本！', 'success');
     }
 
-    /* STREAMING_CHUNK:Calculating dynamic WBS codes for hierarchical tasks... */
+    /* STREAMING_CHUNK:JS Functions for WBS Map calculation... */
     function calculateWBSMap() {
-        const wbsMap = {};
+        var wbsMap = {};
         function assignWBS(parentId, prefix) {
-            const children = state.tasks.filter(t => (t.parent === parentId || (!parentId && !t.parent)));
-            children.forEach((child, idx) => {
-                const currentWBS = prefix ? `${prefix}.${idx + 1}` : `${idx + 1}`;
+            var children = state.tasks.filter(function(t) { return (t.parent === parentId || (!parentId && !t.parent)); });
+            children.forEach(function(child, idx) {
+                var currentWBS = prefix ? (prefix + '.' + (idx + 1)) : (idx + 1).toString();
                 wbsMap[child.id] = currentWBS;
                 assignWBS(child.id, currentWBS);
             });
@@ -543,103 +492,91 @@
     }
 
     function getTaskDepth(taskId) {
-        let depth = 0;
-        let current = state.tasks.find(t => t.id === taskId);
+        var depth = 0;
+        var current = state.tasks.find(function(t) { return t.id === taskId; });
         while (current && current.parent) {
             depth++;
-            current = state.tasks.find(t => t.id === current.parent);
+            current = state.tasks.find(function(t) { return t.id === current.parent; });
             if (depth > 10) break;
         }
         return depth;
     }
 
     function getDescendantIds(parentId) {
-        let descendants = [];
-        const children = state.tasks.filter(t => t.parent === parentId);
-        children.forEach(child => {
+        var descendants = [];
+        var children = state.tasks.filter(function(t) { return t.parent === parentId; });
+        children.forEach(function(child) {
             descendants.push(child.id);
             descendants = descendants.concat(getDescendantIds(child.id));
         });
         return descendants;
     }
 
-    /* STREAMING_CHUNK:Rendering task list table rows... */
+    /* STREAMING_CHUNK:JS Function for rendering task list... */
     function renderTaskList() {
-        const container = document.getElementById('taskListContainer');
+        var container = document.getElementById('taskListContainer');
         if (!container) return;
         container.innerHTML = '';
 
-        const wbsMap = calculateWBSMap();
+        var wbsMap = calculateWBSMap();
 
-        let filteredTasks = state.tasks.filter(t => {
+        var filteredTasks = state.tasks.filter(function(t) {
             if (state.filterAssignee) {
-                if (!t.assignee || !t.assignee.includes(state.filterAssignee)) return false;
+                if (!t.assignee || t.assignee.indexOf(state.filterAssignee) === -1) return false;
             }
             return true;
         });
 
-        const hiddenTaskIds = new Set();
-        state.tasks.forEach(t => {
+        var hiddenTaskIds = new Set();
+        state.tasks.forEach(function(t) {
             if (t.collapsed) {
-                getDescendantIds(t.id).forEach(id => hiddenTaskIds.add(id));
+                getDescendantIds(t.id).forEach(function(id) { hiddenTaskIds.add(id); });
             }
         });
 
-        filteredTasks.forEach(task => {
+        filteredTasks.forEach(function(task) {
             if (hiddenTaskIds.has(task.id)) return;
 
-            const depth = getTaskDepth(task.id);
-            const isSelected = state.selectedTaskId === task.id;
-            const children = state.tasks.filter(t => t.parent === task.id);
-            const hasChildren = children.length > 0 || task.type === 'GROUP';
+            var depth = getTaskDepth(task.id);
+            var isSelected = state.selectedTaskId === task.id;
+            var children = state.tasks.filter(function(t) { return t.parent === task.id; });
+            var hasChildren = children.length > 0 || task.type === 'GROUP';
 
-            const duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
-            const isMilestone = task.type === 'MILESTONE';
-            const wbsCode = wbsMap[task.id] || '';
+            var duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+            var isMilestone = task.type === 'MILESTONE';
+            var wbsCode = wbsMap[task.id] || '';
 
-            const row = document.createElement('div');
-            row.className = `task-row flex items-center px-3 py-2 text-xs border-b border-slate-100 cursor-pointer transition ${isSelected ? 'selected' : ''}`;
-            row.onclick = () => selectTask(task.id);
-            row.ondblclick = () => openTaskModal(task.id);
+            var row = document.createElement('div');
+            row.className = 'task-row flex items-center px-3 py-2 text-xs border-b border-slate-100 cursor-pointer transition ' + (isSelected ? 'selected' : '');
+            row.onclick = function() { selectTask(task.id); };
+            row.ondblclick = function() { openTaskModal(task.id); };
 
-            let icon = '<i class="fa-regular fa-file-lines text-slate-400 mr-1.5"></i>';
+            var icon = '<i class="fa-regular fa-file-lines text-slate-400 mr-1.5"></i>';
             if (task.type === 'GROUP') icon = '<i class="fa-solid fa-folder-open text-amber-500 mr-1.5"></i>';
             if (task.type === 'MILESTONE') icon = '<i class="fa-solid fa-diamond text-indigo-600 mr-1.5"></i>';
 
-            let collapseBtn = '';
+            var collapseBtn = '';
             if (hasChildren) {
-                collapseBtn = `
-                    <button onclick="toggleCollapse('${task.id}'); event.stopPropagation();" class="mr-1 text-slate-400 hover:text-slate-600 w-4 h-4 flex items-center justify-center rounded">
-                        <i class="fa-solid ${task.collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[10px]"></i>
-                    </button>
-                `;
+                collapseBtn = '<button onclick="toggleCollapse(\'' + task.id + '\'); event.stopPropagation();" class="mr-1 text-slate-400 hover:text-slate-600 w-4 h-4 flex items-center justify-center rounded"><i class="fa-solid ' + (task.collapsed ? 'fa-chevron-right' : 'fa-chevron-down') + ' text-[10px]"></i></button>';
             } else {
-                collapseBtn = `<span class="w-5 inline-block"></span>`;
+                collapseBtn = '<span class="w-5 inline-block"></span>';
             }
 
-            row.innerHTML = `
-                <div class="flex items-center flex-1 min-w-0 pr-2" style="padding-left: ${depth * 14}px">
-                    ${collapseBtn}
-                    ${icon}
-                    <span class="bg-slate-100 text-slate-600 font-mono text-[10px] px-1.5 py-0.5 rounded border border-slate-200 mr-1.5 shrink-0">${wbsCode}</span>
-                    <span class="truncate font-medium text-slate-700 hover:text-indigo-600" title="${task.name}">
-                        ${task.name}
-                    </span>
-                </div>
-                <div class="w-24 text-center truncate text-slate-500 text-[11px]" title="${task.assignee || '-'}">
-                    ${task.assignee ? `<span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">${task.assignee}</span>` : '-'}
-                </div>
-                <div class="w-12 text-center font-medium text-slate-600">${isMilestone ? '0天' : (isNaN(duration) ? '-' : duration + '天')}</div>
-                <div class="w-12 text-right pr-1 font-semibold text-slate-700">${task.progress || 0}%</div>
-                <div class="w-14 text-center flex items-center justify-center space-x-1">
-                    <button onclick="duplicateTask('${task.id}'); event.stopPropagation();" title="複製群組/任務及其子階層" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition">
-                        <i class="fa-regular fa-copy"></i>
-                    </button>
-                    <button onclick="createSubTask('${task.id}'); event.stopPropagation();" title="新增子任務 (Enter)" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
-            `;
+            row.innerHTML = '' +
+                '<div class="flex items-center flex-1 min-w-0 pr-2" style="padding-left: ' + (depth * 14) + 'px">' +
+                    collapseBtn + icon +
+                    '<span class="bg-slate-100 text-slate-600 font-mono text-[10px] px-1.5 py-0.5 rounded border border-slate-200 mr-1.5 shrink-0">' + wbsCode + '</span>' +
+                    '<span class="truncate font-medium text-slate-700 hover:text-indigo-600" title="' + task.name + '">' + task.name + '</span>' +
+                '</div>' +
+                '<div class="w-24 text-center truncate text-slate-500 text-[11px]" title="' + (task.assignee || '-') + '">' +
+                    (task.assignee ? '<span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">' + task.assignee + '</span>' : '-') +
+                '</div>' +
+                '<div class="w-12 text-center font-medium text-slate-600">' + (isMilestone ? '0天' : (isNaN(duration) ? '-' : duration + '天')) + '</div>' +
+                '<div class="w-12 text-right pr-1 font-semibold text-slate-700">' + (task.progress || 0) + '%</div>' +
+                '<div class="w-14 text-center flex items-center justify-center space-x-1">' +
+                    '<button onclick="duplicateTask(\'' + task.id + '\'); event.stopPropagation();" title="複製群組/任務" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition"><i class="fa-regular fa-copy"></i></button>' +
+                    '<button onclick="createSubTask(\'' + task.id + '\'); event.stopPropagation();" title="新增子任務" class="text-slate-400 hover:text-indigo-600 p-1 rounded hover:bg-slate-200/50 transition"><i class="fa-solid fa-plus"></i></button>' +
+                '</div>';
 
             container.appendChild(row);
         });
@@ -647,18 +584,18 @@
         updateMetrics();
     }
 
-    /* STREAMING_CHUNK:Rendering timeline bars and calendar grid... */
+    /* STREAMING_CHUNK:JS Function for rendering timeline grid... */
     function renderTimeline() {
-        const container = document.getElementById('timelineContainer');
+        var container = document.getElementById('timelineContainer');
         if (!container) return;
         container.innerHTML = '';
 
         if (state.tasks.length === 0) return;
 
-        let minDate = dayjs('2026-04-01');
-        let maxDate = dayjs('2027-06-30');
+        var minDate = dayjs('2026-04-01');
+        var maxDate = dayjs('2027-06-30');
 
-        state.tasks.forEach(t => {
+        state.tasks.forEach(function(t) {
             if (t.startDate && dayjs(t.startDate).isValid() && dayjs(t.startDate).isBefore(minDate)) minDate = dayjs(t.startDate);
             if (t.endDate && dayjs(t.endDate).isValid() && dayjs(t.endDate).isAfter(maxDate)) maxDate = dayjs(t.endDate);
         });
@@ -666,10 +603,10 @@
         minDate = minDate.subtract(3, 'day');
         maxDate = maxDate.add(7, 'day');
 
-        const totalDays = maxDate.diff(minDate, 'day') + 1;
+        var totalDays = maxDate.diff(minDate, 'day') + 1;
         
-        let unitWidth = 40;
-        let stepDays = 1;
+        var unitWidth = 40;
+        var stepDays = 1;
         if (state.viewMode === 'week') {
             unitWidth = 90;
             stepDays = 7;
@@ -678,90 +615,85 @@
             stepDays = 30;
         }
 
-        const totalUnits = Math.ceil(totalDays / stepDays);
-        const timelineWidth = totalUnits * unitWidth;
+        var totalUnits = Math.ceil(totalDays / stepDays);
+        var timelineWidth = totalUnits * unitWidth;
 
-        // Header
-        const headerRow = document.createElement('div');
+        var headerRow = document.createElement('div');
         headerRow.className = 'h-10 bg-slate-100 border-b border-slate-200 flex items-center sticky top-0 z-10 text-xs font-semibold text-slate-600';
-        headerRow.style.width = `${timelineWidth}px`;
+        headerRow.style.width = timelineWidth + 'px';
 
-        for (let i = 0; i < totalUnits; i++) {
-            const currentDate = minDate.add(i * stepDays, 'day');
-            const isToday = currentDate.isSame(dayjs(), 'day');
+        for (var i = 0; i < totalUnits; i++) {
+            var currentDate = minDate.add(i * stepDays, 'day');
+            var isToday = currentDate.isSame(dayjs(), 'day');
 
-            let titleTop = currentDate.format('MM/DD');
-            let titleSub = currentDate.format('dd');
+            var titleTop = currentDate.format('MM/DD');
+            var titleSub = currentDate.format('dd');
 
             if (state.viewMode === 'week') {
-                titleTop = `第 ${i + 1} 週`;
+                titleTop = '第 ' + (i + 1) + ' 週';
                 titleSub = currentDate.format('MM/DD');
             } else if (state.viewMode === 'month') {
                 titleTop = currentDate.format('YYYY年');
                 titleSub = currentDate.format('M月');
             }
 
-            const dayCell = document.createElement('div');
-            dayCell.style.width = `${unitWidth}px`;
-            dayCell.className = `text-center shrink-0 border-r border-slate-200 h-full flex flex-col justify-center ${isToday ? 'bg-indigo-50 font-bold text-indigo-600' : ''}`;
-            dayCell.innerHTML = `
-                <div class="text-[10px] text-slate-400">${titleTop}</div>
-                <div>${titleSub}</div>
-            `;
+            var dayCell = document.createElement('div');
+            dayCell.style.width = unitWidth + 'px';
+            dayCell.className = 'text-center shrink-0 border-r border-slate-200 h-full flex flex-col justify-center ' + (isToday ? 'bg-indigo-50 font-bold text-indigo-600' : '');
+            dayCell.innerHTML = '<div class="text-[10px] text-slate-400">' + titleTop + '</div><div>' + titleSub + '</div>';
             headerRow.appendChild(dayCell);
         }
         container.appendChild(headerRow);
 
-        // Task Bars Body
-        const hiddenTaskIds = new Set();
-        state.tasks.forEach(t => {
+        var hiddenTaskIds = new Set();
+        state.tasks.forEach(function(t) {
             if (t.collapsed) {
-                getDescendantIds(t.id).forEach(id => hiddenTaskIds.add(id));
+                getDescendantIds(t.id).forEach(function(id) { hiddenTaskIds.add(id); });
             }
         });
 
-        const bodyContainer = document.createElement('div');
+        var bodyContainer = document.createElement('div');
         bodyContainer.className = 'gantt-grid relative';
-        bodyContainer.style.width = `${timelineWidth}px`;
-        bodyContainer.style.backgroundSize = `${unitWidth}px 100%`;
+        bodyContainer.style.width = timelineWidth + 'px';
+        bodyContainer.style.backgroundSize = unitWidth + 'px 100%';
 
-        state.tasks.forEach(task => {
+        state.tasks.forEach(function(task) {
             if (hiddenTaskIds.has(task.id)) return;
 
-            const startOffsetDays = dayjs(task.startDate).diff(minDate, 'day');
-            const durationDays = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+            var startOffsetDays = dayjs(task.startDate).diff(minDate, 'day');
+            var durationDays = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
 
-            const leftPx = (startOffsetDays / stepDays) * unitWidth;
-            const widthPx = Math.max(((isNaN(durationDays) ? 1 : durationDays) / stepDays) * unitWidth - 4, 12);
+            var leftPx = (startOffsetDays / stepDays) * unitWidth;
+            var widthPx = Math.max(((isNaN(durationDays) ? 1 : durationDays) / stepDays) * unitWidth - 4, 12);
 
-            const row = document.createElement('div');
+            var row = document.createElement('div');
             row.className = 'h-9 border-b border-slate-100 flex items-center relative';
 
             if (task.type === 'MILESTONE') {
-                const diamond = document.createElement('div');
+                var diamond = document.createElement('div');
                 diamond.className = 'absolute w-4 h-4 bg-indigo-600 rotate-45 border-2 border-white shadow cursor-pointer hover:scale-125 transition transform';
-                diamond.style.left = `${leftPx + unitWidth / 2 - 8}px`;
-                diamond.title = `${task.name} (${task.startDate})`;
-                diamond.onclick = () => openTaskModal(task.id);
+                diamond.style.left = (leftPx + unitWidth / 2 - 8) + 'px';
+                diamond.title = task.name + ' (' + task.startDate + ')';
+                diamond.onclick = function() { openTaskModal(task.id); };
                 row.appendChild(diamond);
             } else {
-                const bar = document.createElement('div');
-                const isGroup = task.type === 'GROUP';
-                const bgColor = task.color || (isGroup ? '#3b82f6' : '#6366f1');
-                const isCritical = state.showCriticalPath && (task.progress < 100) && (dayjs(task.endDate).isBefore(dayjs().add(14, 'day')));
+                var bar = document.createElement('div');
+                var isGroup = task.type === 'GROUP';
+                var bgColor = task.color || (isGroup ? '#3b82f6' : '#6366f1');
+                var isCritical = state.showCriticalPath && (task.progress < 100) && (dayjs(task.endDate).isBefore(dayjs().add(14, 'day')));
 
-                bar.className = `absolute h-6 rounded-md shadow-xs flex items-center px-2 text-[11px] text-white font-medium cursor-pointer hover:brightness-110 transition overflow-hidden ${isCritical ? 'critical-bar' : ''}`;
-                bar.style.left = `${Math.max(leftPx, 0) + 2}px`;
-                bar.style.width = `${widthPx}px`;
+                bar.className = 'absolute h-6 rounded-md shadow-xs flex items-center px-2 text-[11px] text-white font-medium cursor-pointer hover:brightness-110 transition overflow-hidden ' + (isCritical ? 'critical-bar' : '');
+                bar.style.left = (Math.max(leftPx, 0) + 2) + 'px';
+                bar.style.width = widthPx + 'px';
                 bar.style.backgroundColor = bgColor;
-                bar.onclick = () => openTaskModal(task.id);
+                bar.onclick = function() { openTaskModal(task.id); };
 
-                const progressOverlay = document.createElement('div');
+                var progressOverlay = document.createElement('div');
                 progressOverlay.className = 'absolute left-0 top-0 bottom-0 bg-black/20 rounded-l-md pointer-events-none';
-                progressOverlay.style.width = `${task.progress || 0}%`;
+                progressOverlay.style.width = (task.progress || 0) + '%';
                 bar.appendChild(progressOverlay);
 
-                const titleSpan = document.createElement('span');
+                var titleSpan = document.createElement('span');
                 titleSpan.className = 'relative z-10 truncate';
                 titleSpan.innerText = task.name;
                 bar.appendChild(titleSpan);
@@ -780,23 +712,23 @@
         renderTimeline();
     }
 
-    /* STREAMING_CHUNK:Implementing view modes and date change handlers... */
+    /* STREAMING_CHUNK:JS Functions for View Mode & Dates... */
     function setViewMode(mode) {
         state.viewMode = mode;
         document.getElementById('btnViewDay').className = mode === 'day' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
         document.getElementById('btnViewWeek').className = mode === 'week' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
         document.getElementById('btnViewMonth').className = mode === 'month' ? 'px-3 py-1 rounded-md text-xs font-semibold transition bg-white shadow-sm text-indigo-600' : 'px-3 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 transition';
         renderGantt();
-        showToast(`已切換為「${mode === 'day' ? '日' : mode === 'week' ? '週' : '月'}」檢視視角`, 'info');
+        showToast('已切換為「' + (mode === 'day' ? '日' : mode === 'week' ? '週' : '月') + '」檢視視角', 'info');
     }
 
     function onStartDateChange() {
-        const startStr = document.getElementById('taskStartDate').value;
-        const endStr = document.getElementById('taskEndDate').value;
-        const durationInput = document.getElementById('taskDuration');
+        var startStr = document.getElementById('taskStartDate').value;
+        var endStr = document.getElementById('taskEndDate').value;
+        var durationInput = document.getElementById('taskDuration');
 
         if (startStr && endStr) {
-            let duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
+            var duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
             if (duration < 1) {
                 duration = 1;
                 document.getElementById('taskEndDate').value = startStr;
@@ -806,12 +738,12 @@
     }
 
     function onEndDateChange() {
-        const startStr = document.getElementById('taskStartDate').value;
-        const endStr = document.getElementById('taskEndDate').value;
-        const durationInput = document.getElementById('taskDuration');
+        var startStr = document.getElementById('taskStartDate').value;
+        var endStr = document.getElementById('taskEndDate').value;
+        var durationInput = document.getElementById('taskDuration');
 
         if (startStr && endStr) {
-            let duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
+            var duration = dayjs(endStr).diff(dayjs(startStr), 'day') + 1;
             if (duration < 1) {
                 duration = 1;
                 document.getElementById('taskStartDate').value = endStr;
@@ -821,18 +753,18 @@
     }
 
     function onDurationChange() {
-        const startStr = document.getElementById('taskStartDate').value;
-        const duration = parseInt(document.getElementById('taskDuration').value) || 1;
+        var startStr = document.getElementById('taskStartDate').value;
+        var duration = parseInt(document.getElementById('taskDuration').value) || 1;
 
         if (startStr && duration > 0) {
-            const newEndDate = dayjs(startStr).add(duration - 1, 'day').format('YYYY-MM-DD');
+            var newEndDate = dayjs(startStr).add(duration - 1, 'day').format('YYYY-MM-DD');
             document.getElementById('taskEndDate').value = newEndDate;
         }
     }
 
     function handleTaskTypeChange() {
-        const type = document.getElementById('taskType').value;
-        const durationInput = document.getElementById('taskDuration');
+        var type = document.getElementById('taskType').value;
+        var durationInput = document.getElementById('taskDuration');
         if (type === 'MILESTONE') {
             durationInput.value = 0;
             durationInput.disabled = true;
@@ -844,38 +776,37 @@
         }
     }
 
-    /* STREAMING_CHUNK:Managing assignee filters and interactive tag deletion... */
+    /* STREAMING_CHUNK:JS Assignee filter functions... */
     function initAssigneeFilter() {
-        const select = document.getElementById('filterAssignee');
+        var select = document.getElementById('filterAssignee');
         if (!select) return;
         select.innerHTML = '<option value="">全部負責人 / 單位</option>';
-        state.assignees.forEach(name => {
-            select.innerHTML += `<option value="${name}">${name}</option>`;
+        state.assignees.forEach(function(name) {
+            select.innerHTML += '<option value="' + name + '">' + name + '</option>';
         });
     }
 
-    function renderAssigneeCheckboxes(selectedAssignees = '') {
-        const container = document.getElementById('assigneeCheckboxes');
+    function renderAssigneeCheckboxes(selectedAssignees) {
+        selectedAssignees = selectedAssignees || '';
+        var container = document.getElementById('assigneeCheckboxes');
         if (!container) return;
         container.innerHTML = '';
 
-        const selectedArray = selectedAssignees ? selectedAssignees.split(',').map(s => s.trim()) : [];
+        var selectedArray = selectedAssignees ? selectedAssignees.split(',').map(function(s) { return s.trim(); }) : [];
 
-        state.assignees.forEach(name => {
-            const isChecked = selectedArray.includes(name);
-            const tag = document.createElement('label');
-            tag.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition ${isChecked ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`;
-            tag.innerHTML = `
-                <input type="checkbox" value="${name}" ${isChecked ? 'checked' : ''} onchange="updateAssigneeTagStyle(this)" class="hidden">
-                <span>${name}</span>
-                <i class="fa-solid fa-xmark text-[10px] ml-1 opacity-60 hover:opacity-100 hover:text-rose-300 cursor-pointer" onclick="deleteAssignee('${name}', event)" title="刪除此選單項目"></i>
-            `;
+        state.assignees.forEach(function(name) {
+            var isChecked = selectedArray.indexOf(name) !== -1;
+            var tag = document.createElement('label');
+            tag.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition ' + (isChecked ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300');
+            tag.innerHTML = '<input type="checkbox" value="' + name + '" ' + (isChecked ? 'checked' : '') + ' onchange="updateAssigneeTagStyle(this)" class="hidden">' +
+                '<span>' + name + '</span>' +
+                '<i class="fa-solid fa-xmark text-[10px] ml-1 opacity-60 hover:opacity-100 hover:text-rose-300 cursor-pointer" onclick="deleteAssignee(\'' + name + '\', event)" title="刪除此選單項目"></i>';
             container.appendChild(tag);
         });
     }
 
     function updateAssigneeTagStyle(checkbox) {
-        const label = checkbox.parentElement;
+        var label = checkbox.parentElement;
         if (checkbox.checked) {
             label.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer transition bg-indigo-600 text-white';
         } else {
@@ -884,30 +815,30 @@
     }
 
     function addNewAssigneeOption() {
-        const input = document.getElementById('newAssigneeInput');
-        const newName = input.value.trim();
-        if (newName && !state.assignees.includes(newName)) {
+        var input = document.getElementById('newAssigneeInput');
+        var newName = input.value.trim();
+        if (newName && state.assignees.indexOf(newName) === -1) {
             state.assignees.push(newName);
             saveToStorage();
             initAssigneeFilter();
             renderAssigneeCheckboxes(getSelectedAssigneesString());
             input.value = '';
-            showToast(`已新增負責人/單位選項: ${newName}`, 'success');
+            showToast('已新增負責人/單位選項: ' + newName, 'success');
         }
     }
 
     function deleteAssignee(name, event) {
         if (event) event.stopPropagation();
-        state.assignees = state.assignees.filter(a => a !== name);
+        state.assignees = state.assignees.filter(function(a) { return a !== name; });
         saveToStorage();
         initAssigneeFilter();
         renderAssigneeCheckboxes(getSelectedAssigneesString());
-        showToast(`已刪除負責人選單項目：${name}`, 'info');
+        showToast('已刪除負責人選單項目：' + name, 'info');
     }
 
     function getSelectedAssigneesString() {
-        const checkedBoxes = document.querySelectorAll('#assigneeCheckboxes input[type="checkbox"]:checked');
-        return Array.from(checkedBoxes).map(cb => cb.value).join(', ');
+        var checkedBoxes = document.querySelectorAll('#assigneeCheckboxes input[type="checkbox"]:checked');
+        return Array.from(checkedBoxes).map(function(cb) { return cb.value; }).join(', ');
     }
 
     function selectTask(taskId) {
@@ -915,27 +846,26 @@
         renderTaskList();
     }
 
-    /* STREAMING_CHUNK:Handling modal form submissions and task duplications... */
+    /* STREAMING_CHUNK:JS Functions for modal and tasks CRUD... */
     function toggleExpandAll() {
-        const anyCollapsed = state.tasks.some(t => t.collapsed);
-        state.tasks.forEach(t => {
-            t.collapsed = !anyCollapsed;
-        });
+        var anyCollapsed = state.tasks.some(function(t) { return t.collapsed; });
+        state.tasks.forEach(function(t) { t.collapsed = !anyCollapsed; });
         saveToStorage();
         renderGantt();
         showToast(anyCollapsed ? '已展開所有任務群組' : '已收合所有任務群組', 'info');
     }
 
-    function openTaskModal(taskId = null) {
-        const modal = document.getElementById('taskModal');
-        const form = document.getElementById('taskForm');
+    function openTaskModal(taskId) {
+        taskId = taskId || null;
+        var modal = document.getElementById('taskModal');
+        var form = document.getElementById('taskForm');
         if (!modal || !form) return;
         form.reset();
 
         populateParentDropdown(taskId);
 
         if (taskId) {
-            const task = state.tasks.find(t => t.id === taskId);
+            var task = state.tasks.find(function(t) { return t.id === taskId; });
             if (!task) return;
 
             document.getElementById('modalTitle').innerText = '編輯任務屬性';
@@ -946,7 +876,7 @@
             document.getElementById('taskStartDate').value = task.startDate;
             document.getElementById('taskEndDate').value = task.endDate;
 
-            const duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
+            var duration = dayjs(task.endDate).diff(dayjs(task.startDate), 'day') + 1;
             document.getElementById('taskDuration').value = task.type === 'MILESTONE' ? 0 : (isNaN(duration) ? 1 : duration);
 
             document.getElementById('taskProgress').value = task.progress || 0;
@@ -975,19 +905,21 @@
     }
 
     function closeTaskModal() {
-        const modal = document.getElementById('taskModal');
+        var modal = document.getElementById('taskModal');
         if (modal) modal.classList.add('hidden');
     }
 
     function populateParentDropdown(currentTaskId) {
-        const select = document.getElementById('taskParent');
+        var select = document.getElementById('taskParent');
         if (!select) return;
         select.innerHTML = '<option value="">(無 - 最頂層)</option>';
 
-        function addOptions(parentId = null, prefix = '') {
-            const children = state.tasks.filter(t => (t.parent === parentId || (!parentId && !t.parent)) && t.id !== currentTaskId);
-            children.forEach(child => {
-                select.innerHTML += `<option value="${child.id}">${prefix}${child.name}</option>`;
+        function addOptions(parentId, prefix) {
+            var children = state.tasks.filter(function(t) {
+                return (t.parent === parentId || (!parentId && !t.parent)) && t.id !== currentTaskId;
+            });
+            children.forEach(function(child) {
+                select.innerHTML += '<option value="' + child.id + '">' + prefix + child.name + '</option>';
                 addOptions(child.id, prefix + '└─ ');
             });
         }
@@ -998,18 +930,18 @@
     function handleTaskFormSubmit(e) {
         e.preventDefault();
 
-        const taskId = document.getElementById('taskId').value;
-        const name = document.getElementById('taskName').value;
-        const type = document.getElementById('taskType').value;
-        const parent = document.getElementById('taskParent').value || null;
-        const startDate = document.getElementById('taskStartDate').value;
-        const endDate = document.getElementById('taskEndDate').value;
-        const progress = parseInt(document.getElementById('taskProgress').value) || 0;
-        const status = document.getElementById('taskStatus').value;
-        const assignee = getSelectedAssigneesString();
+        var taskId = document.getElementById('taskId').value;
+        var name = document.getElementById('taskName').value;
+        var type = document.getElementById('taskType').value;
+        var parent = document.getElementById('taskParent').value || null;
+        var startDate = document.getElementById('taskStartDate').value;
+        var endDate = document.getElementById('taskEndDate').value;
+        var progress = parseInt(document.getElementById('taskProgress').value) || 0;
+        var status = document.getElementById('taskStatus').value;
+        var assignee = getSelectedAssigneesString();
 
         if (taskId) {
-            const task = state.tasks.find(t => t.id === taskId);
+            var task = state.tasks.find(function(t) { return t.id === taskId; });
             if (task) {
                 task.name = name;
                 task.type = type;
@@ -1021,17 +953,17 @@
                 task.assignee = assignee;
             }
         } else {
-            const newId = 'T-' + Date.now().toString().slice(-5);
-            const newTask = {
+            var newId = 'T-' + Date.now().toString().slice(-5);
+            var newTask = {
                 id: newId,
-                name,
-                type,
-                parent,
-                startDate,
-                endDate,
-                progress,
-                status,
-                assignee,
+                name: name,
+                type: type,
+                parent: parent,
+                startDate: startDate,
+                endDate: endDate,
+                progress: progress,
+                status: status,
+                assignee: assignee,
                 color: '#6366f1'
             };
             state.tasks.push(newTask);
@@ -1044,13 +976,13 @@
     }
 
     function createSubTask(parentId) {
-        const parentTask = state.tasks.find(t => t.id === parentId);
+        var parentTask = state.tasks.find(function(t) { return t.id === parentId; });
         if (!parentTask) return;
 
         parentTask.collapsed = false;
 
-        const newId = 'T-' + Date.now().toString().slice(-5);
-        const newSubTask = {
+        var newId = 'T-' + Date.now().toString().slice(-5);
+        var newSubTask = {
             id: newId,
             name: "新階層子任務",
             type: "TASK",
@@ -1063,7 +995,7 @@
             color: "#6366f1"
         };
 
-        const index = state.tasks.findIndex(t => t.id === parentId);
+        var index = state.tasks.findIndex(function(t) { return t.id === parentId; });
         state.tasks.splice(index + 1, 0, newSubTask);
 
         state.selectedTaskId = newId;
@@ -1073,60 +1005,59 @@
     }
 
     function duplicateTask(taskId) {
-        const rootTask = state.tasks.find(t => t.id === taskId);
+        var rootTask = state.tasks.find(function(t) { return t.id === taskId; });
         if (!rootTask) return;
 
-        const subtreeIds = [taskId, ...getDescendantIds(taskId)];
-        const subtreeTasks = state.tasks.filter(t => subtreeIds.includes(t.id));
+        var subtreeIds = [taskId].concat(getDescendantIds(taskId));
+        var subtreeTasks = state.tasks.filter(function(t) { return subtreeIds.indexOf(t.id) !== -1; });
 
-        const idMap = {};
-        const now = Date.now();
-        subtreeTasks.forEach((t, idx) => {
+        var idMap = {};
+        var now = Date.now();
+        subtreeTasks.forEach(function(t, idx) {
             idMap[t.id] = 'T-' + (now + idx) + '-' + Math.random().toString(36).substring(2, 5);
         });
 
-        const clonedTasks = subtreeTasks.map(t => {
-            const isRoot = (t.id === taskId);
-            return {
-                ...JSON.parse(JSON.stringify(t)),
+        var clonedTasks = subtreeTasks.map(function(t) {
+            var isRoot = (t.id === taskId);
+            return Object.assign({}, t, {
                 id: idMap[t.id],
-                name: isRoot ? `${t.name} (副本)` : t.name,
+                name: isRoot ? (t.name + ' (副本)') : t.name,
                 parent: isRoot ? t.parent : idMap[t.parent]
-            };
+            });
         });
 
-        let lastIndex = -1;
-        state.tasks.forEach((t, idx) => {
-            if (subtreeIds.includes(t.id)) lastIndex = idx;
+        var lastIndex = -1;
+        state.tasks.forEach(function(t, idx) {
+            if (subtreeIds.indexOf(t.id) !== -1) lastIndex = idx;
         });
 
         if (lastIndex !== -1) {
-            state.tasks.splice(lastIndex + 1, 0, ...clonedTasks);
+            state.tasks.splice.apply(state.tasks, [lastIndex + 1, 0].concat(clonedTasks));
         } else {
-            state.tasks.push(...clonedTasks);
+            state.tasks.push.apply(state.tasks, clonedTasks);
         }
 
         state.selectedTaskId = idMap[taskId];
         saveToStorage();
         renderGantt();
-        showToast(`已連動複製群組/任務「${rootTask.name}」及其所有階層子項目！`, 'success');
+        showToast('已連動複製群組/任務「' + rootTask.name + '」及其所有階層子項目！', 'success');
     }
 
     function duplicateCurrentTaskFromModal() {
-        const id = document.getElementById('taskId').value;
+        var id = document.getElementById('taskId').value;
         if (!id) return;
         closeTaskModal();
         duplicateTask(id);
     }
 
     function deleteCurrentTask() {
-        const id = document.getElementById('taskId').value;
+        var id = document.getElementById('taskId').value;
         if (!id) return;
 
-        const descendantIds = getDescendantIds(id);
-        const toDeleteIds = [id, ...descendantIds];
+        var descendantIds = getDescendantIds(id);
+        var toDeleteIds = [id].concat(descendantIds);
 
-        state.tasks = state.tasks.filter(t => !toDeleteIds.includes(t.id));
+        state.tasks = state.tasks.filter(function(t) { return toDeleteIds.indexOf(t.id) === -1; });
         saveToStorage();
         renderGantt();
         closeTaskModal();
@@ -1134,7 +1065,7 @@
     }
 
     function toggleCollapse(taskId) {
-        const task = state.tasks.find(t => t.id === taskId);
+        var task = state.tasks.find(function(t) { return t.id === taskId; });
         if (task) {
             task.collapsed = !task.collapsed;
             saveToStorage();
@@ -1143,10 +1074,10 @@
     }
 
     function setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('taskModal');
-            const importModal = document.getElementById('importModal');
-            const isModalOpen = (modal && !modal.classList.contains('hidden')) || (importModal && !importModal.classList.contains('hidden'));
+        document.addEventListener('keydown', function(e) {
+            var modal = document.getElementById('taskModal');
+            var importModal = document.getElementById('importModal');
+            var isModalOpen = (modal && !modal.classList.contains('hidden')) || (importModal && !importModal.classList.contains('hidden'));
 
             if (e.key === 'Enter' && state.selectedTaskId && !isModalOpen) {
                 e.preventDefault();
@@ -1156,26 +1087,26 @@
     }
 
     function initPaneResizer() {
-        const resizer = document.getElementById('paneResizer');
-        const leftPane = document.getElementById('leftPane');
+        var resizer = document.getElementById('paneResizer');
+        var leftPane = document.getElementById('leftPane');
         if (!resizer || !leftPane) return;
-        let isResizing = false;
+        var isResizing = false;
 
-        resizer.addEventListener('mousedown', (e) => {
+        resizer.addEventListener('mousedown', function() {
             isResizing = true;
             resizer.classList.add('resizing');
             document.body.style.cursor = 'col-resize';
         });
 
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', function(e) {
             if (!isResizing) return;
-            const newWidth = e.clientX;
+            var newWidth = e.clientX;
             if (newWidth > 220 && newWidth < 700) {
-                leftPane.style.width = `${newWidth}px`;
+                leftPane.style.width = newWidth + 'px';
             }
         });
 
-        document.addEventListener('mouseup', () => {
+        document.addEventListener('mouseup', function() {
             if (isResizing) {
                 isResizing = false;
                 resizer.classList.remove('resizing');
@@ -1185,13 +1116,13 @@
     }
 
     function applyFilters() {
-        const select = document.getElementById('filterAssignee');
+        var select = document.getElementById('filterAssignee');
         if (select) state.filterAssignee = select.value;
         renderGantt();
     }
 
     function scrollToToday() {
-        const container = document.getElementById('rightPane');
+        var container = document.getElementById('rightPane');
         if (container) container.scrollLeft = 200;
     }
 
@@ -1201,19 +1132,19 @@
         showToast(state.showCriticalPath ? '已啟用關鍵路徑高亮顯示' : '已關閉關鍵路徑顯示', 'info');
     }
 
-    /* STREAMING_CHUNK:Configuring JSON import and export functions... */
+    /* STREAMING_CHUNK:JS Functions for JSON Import and Export... */
     function exportJSON() {
-        const titleElem = document.getElementById('projectTitle');
-        const exportObj = {
+        var titleElem = document.getElementById('projectTitle');
+        var exportObj = {
             title: titleElem ? titleElem.innerText.replace("官方正式版", "").replace("分享檢視版", "").trim() : "路人超能100期間限定店專案時程",
             subtext: "展覽籌備、授權、製作、行銷與營運時程甘特圖",
             tasks: state.tasks,
             assigneeList: state.assignees
         };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
-        const downloadAnchor = document.createElement('a');
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+        var downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `mob_psycho_100_gantt_${dayjs().format('YYYYMMDD_HHmm')}.json`);
+        downloadAnchor.setAttribute("download", "mob_psycho_100_gantt_" + dayjs().format('YYYYMMDD_HHmm') + ".json");
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -1221,7 +1152,7 @@
     }
 
     function openImportModal() {
-        const modal = document.getElementById('importModal');
+        var modal = document.getElementById('importModal');
         if (!modal) return;
         document.getElementById('jsonTextArea').value = '';
         document.getElementById('jsonFileInput').value = '';
@@ -1229,34 +1160,34 @@
     }
 
     function closeImportModal() {
-        const modal = document.getElementById('importModal');
+        var modal = document.getElementById('importModal');
         if (modal) modal.classList.add('hidden');
     }
 
     function importJSON(event) {
         if (event && event.target && event.target.files && event.target.files[0]) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
+            var file = event.target.files[0];
+            var reader = new FileReader();
             reader.onload = function(evt) {
                 try {
-                    const text = evt.target.result;
-                    const jsonTextArea = document.getElementById('jsonTextArea');
+                    var text = evt.target.result;
+                    var jsonTextArea = document.getElementById('jsonTextArea');
                     if (jsonTextArea) jsonTextArea.value = text;
                     
-                    const parsed = JSON.parse(text);
-                    let loadedTasks = [];
+                    var parsed = JSON.parse(text);
+                    var loadedTasks = [];
 
                     if (Array.isArray(parsed)) {
                         loadedTasks = parsed;
                     } else if (parsed && Array.isArray(parsed.tasks)) {
                         loadedTasks = parsed.tasks;
                         if (Array.isArray(parsed.assigneeList)) {
-                            state.assignees = Array.from(new Set([...state.assignees, ...parsed.assigneeList]));
+                            state.assignees = Array.from(new Set(state.assignees.concat(parsed.assigneeList)));
                         }
                         if (parsed.title) {
-                            const titleElem = document.getElementById('projectTitle');
+                            var titleElem = document.getElementById('projectTitle');
                             if (titleElem) {
-                                titleElem.innerHTML = `${parsed.title} <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">官方正式版</span>`;
+                                titleElem.innerHTML = parsed.title + ' <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">官方正式版</span>';
                             }
                         }
                     } else {
@@ -1280,26 +1211,26 @@
     window.importJSON = importJSON;
 
     function handleImportJSON() {
-        const text = document.getElementById('jsonTextArea').value.trim();
+        var text = document.getElementById('jsonTextArea').value.trim();
         if (!text) {
             showToast('請貼上 JSON 內容或選擇檔案', 'warning');
             return;
         }
         try {
-            const parsed = JSON.parse(text);
-            let loadedTasks = [];
+            var parsed = JSON.parse(text);
+            var loadedTasks = [];
 
             if (Array.isArray(parsed)) {
                 loadedTasks = parsed;
             } else if (parsed && Array.isArray(parsed.tasks)) {
                 loadedTasks = parsed.tasks;
                 if (Array.isArray(parsed.assigneeList)) {
-                    state.assignees = Array.from(new Set([...state.assignees, ...parsed.assigneeList]));
+                    state.assignees = Array.from(new Set(state.assignees.concat(parsed.assigneeList)));
                 }
                 if (parsed.title) {
-                    const titleElem = document.getElementById('projectTitle');
+                    var titleElem = document.getElementById('projectTitle');
                     if (titleElem) {
-                        titleElem.innerHTML = `${parsed.title} <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">官方正式版</span>`;
+                        titleElem.innerHTML = parsed.title + ' <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">官方正式版</span>';
                     }
                 }
             } else {
@@ -1319,33 +1250,34 @@
     }
 
     function updateMetrics() {
-        const total = state.tasks.length;
-        const completed = state.tasks.filter(t => t.status === 'COMPLETED').length;
-        const inProgress = state.tasks.filter(t => t.status === 'IN_PROGRESS').length;
+        var total = state.tasks.length;
+        var completed = state.tasks.filter(function(t) { return t.status === 'COMPLETED'; }).length;
+        var inProgress = state.tasks.filter(function(t) { return t.status === 'IN_PROGRESS'; }).length;
 
-        let totalProgressSum = 0;
-        state.tasks.forEach(t => totalProgressSum += (t.progress || 0));
-        const avgProgress = total > 0 ? Math.round(totalProgressSum / total) : 0;
+        var totalProgressSum = 0;
+        state.tasks.forEach(function(t) { totalProgressSum += (t.progress || 0); });
+        var avgProgress = total > 0 ? Math.round(totalProgressSum / total) : 0;
 
-        const elemTotal = document.getElementById('metricTotalTasks');
-        const elemInProgress = document.getElementById('metricInProgress');
-        const elemCompleted = document.getElementById('metricCompleted');
-        const elemBar = document.getElementById('metricProgressBar');
-        const elemText = document.getElementById('metricProgressText');
+        var elemTotal = document.getElementById('metricTotalTasks');
+        var elemInProgress = document.getElementById('metricInProgress');
+        var elemCompleted = document.getElementById('metricCompleted');
+        var elemBar = document.getElementById('metricProgressBar');
+        var elemText = document.getElementById('metricProgressText');
 
         if (elemTotal) elemTotal.innerText = total;
         if (elemInProgress) elemInProgress.innerText = inProgress;
         if (elemCompleted) elemCompleted.innerText = completed;
-        if (elemBar) elemBar.style.width = `${avgProgress}%`;
-        if (elemText) elemText.innerText = `${avgProgress}%`;
+        if (elemBar) elemBar.style.width = avgProgress + '%';
+        if (elemText) elemText.innerText = avgProgress + '%';
     }
 
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        const bgClass = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-slate-800';
-        toast.className = `toast fixed bottom-5 right-5 ${bgClass} text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 z-50`;
-        toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
+    function showToast(message, type) {
+        type = type || 'info';
+        var toast = document.createElement('div');
+        var bgClass = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-slate-800';
+        toast.className = 'toast fixed bottom-5 right-5 ' + bgClass + ' text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 z-50';
+        toast.innerHTML = '<i class="fa-solid fa-circle-info"></i> <span>' + message + '</span>';
         document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        setTimeout(function() { toast.remove(); }, 3000);
     }
 </script>
