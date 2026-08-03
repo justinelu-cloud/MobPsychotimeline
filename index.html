@@ -462,6 +462,7 @@
         }
 
         function loadFromStorage() {
+            // Version v3 forces loading updated embedded JSON defaults
             try {
                 var savedTasks = localStorage.getItem('mob_psycho_gantt_tasks_v3');
                 if (savedTasks) {
